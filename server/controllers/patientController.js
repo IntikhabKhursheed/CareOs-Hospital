@@ -1,0 +1,93 @@
+const Patient = require('../models/Patient');
+const Appointment = require('../models/Appointment');
+const Visit = require('../models/Visit');
+const generateMRH = require('../utils/generateMRH');
+const apiResponse = require('../utils/apiResponse');
+
+exports.createPatient = async (req, res, next) => {
+  try {
+    const { name, dateOfBirth, gender, bloodGroup, phone, email, address, emergencyContact, allergies, chronicConditions, photo } = req.body;
+    const MRH = generateMRH();
+    const patient = await Patient.create({
+      MRH,
+      name,
+      dateOfBirth,
+      gender,
+      bloodGroup,
+      phone,
+      email,
+      address,
+      emergencyContact,
+      allergies: allergies || [],
+      chronicConditions: chronicConditions || [],
+      photo: photo || '',
+      registeredBy: req.user._id
+    });
+    res.status(201).json(apiResponse({ success: true, message: 'Patient registered successfully', data: patient }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getPatients = async (req, res, next) => {
+  try {
+    const { search = '', gender, bloodGroup, page = 1, limit = 10 } = req.query;
+    const filters = {};
+    if (search) {
+      filters.$or = [
+        { MRH: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (gender) filters.gender = gender;
+    if (bloodGroup) filters.bloodGroup = bloodGroup;
+    const skip = (Number(page) - 1) * Number(limit);
+    const total = await Patient.countDocuments(filters);
+    const patients = await Patient.find(filters)
+      .populate('registeredBy', 'name email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+    res.status(200).json(apiResponse({ success: true, message: 'Patients retrieved successfully', data: { patients, pagination: { total, page: Number(page), limit: Number(limit) } } }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getPatientById = async (req, res, next) => {
+  try {
+    const patient = await Patient.findById(req.params.id).populate('registeredBy', 'name email');
+    if (!patient) {
+      return res.status(404).json(apiResponse({ success: false, message: 'Patient not found', data: null }));
+    }
+    res.status(200).json(apiResponse({ success: true, message: 'Patient loaded', data: patient }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updatePatient = async (req, res, next) => {
+  try {
+    const updates = { ...req.body };
+    const patient = await Patient.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+    if (!patient) {
+      return res.status(404).json(apiResponse({ success: false, message: 'Patient not found', data: null }));
+    }
+    res.status(200).json(apiResponse({ success: true, message: 'Patient updated successfully', data: patient }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getPatientHistory = async (req, res, next) => {
+  try {
+    const patientId = req.params.id;
+    const appointments = await Appointment.find({ patient: patientId }).populate('doctor', 'name role').sort({ date: -1 });
+    const visits = await Visit.find({ patient: patientId }).populate('doctor', 'name role').populate('appointment', 'date timeSlot status');
+    res.status(200).json(apiResponse({ success: true, message: 'Patient history retrieved', data: { appointments, visits } }));
+  } catch (error) {
+    next(error);
+  }
+};
