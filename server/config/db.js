@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const dns = require('dns');
 
 dotenv.config();
 
@@ -9,6 +10,17 @@ const connectDB = async () => {
     if (!uri) {
       throw new Error('MONGODB_URI is not defined in environment variables');
     }
+
+    const dnsServers = (process.env.DNS_SERVERS || '8.8.8.8,1.1.1.1')
+      .split(',')
+      .map((server) => server.trim())
+      .filter(Boolean);
+
+    if (dnsServers.length) {
+      dns.setServers(dnsServers);
+      console.log('Using DNS servers:', dnsServers.join(', '));
+    }
+
     await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true

@@ -62,15 +62,18 @@ const ResultEntry = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-950 p-4 sm:p-8 text-slate-100">
       <Toaster position="top-right" />
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Lab result entry</h1>
-          <p className="mt-2 text-slate-600">Enter or verify result data for the selected lab order.</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Lab results</p>
+          <h1 className="mt-3 text-4xl font-semibold text-white">Verify and save order data</h1>
+          <p className="mt-3 max-w-2xl text-slate-400">Use the lab result editor to record findings and confirm verification status.</p>
         </div>
-        <div className="space-x-3">
-          <a href="/lab" className="rounded-3xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Back to queue</a>
+        <div className="flex flex-wrap gap-3">
+          <a href="/lab" className="btn-secondary inline-flex items-center justify-center">
+            Back to queue
+          </a>
           <button
             onClick={handleVerify}
             disabled={verified || loading}
@@ -81,27 +84,39 @@ const ResultEntry = () => {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <label className="text-sm font-semibold text-slate-700">Lab order ID</label>
-        <div className="mt-2 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900">{orderId || 'No order selected'}</div>
+      <section className="card-glass rounded-3xl border border-slate-800 p-8 shadow-2xl shadow-slate-950/20">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Lab order ID</p>
+            <div className="mt-2 rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-200">{orderId || 'No order selected'}</div>
+          </div>
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-200">
+            <p className="font-semibold text-white">Verification</p>
+            <p className="mt-2 text-slate-400">Mark results verified after review and sign-off.</p>
+            <div className="mt-4 inline-flex rounded-full bg-slate-800 px-3 py-1 text-xs uppercase tracking-[0.3em] text-slate-300">{verified ? 'Verified' : 'Pending'}</div>
+          </div>
+        </div>
 
-        <label className="mt-6 block text-sm font-semibold text-slate-700">Result payload</label>
+        <label className="mt-8 block text-sm uppercase tracking-[0.2em] text-slate-500">Result payload</label>
         <textarea
           value={results}
           onChange={(e) => setResults(e.target.value)}
-          rows={10}
-          className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900 outline-none transition focus:border-primary"
+          rows={12}
+          className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none transition focus:border-primary"
           placeholder="Use format: Test name: value"
         />
 
-        <button
-          onClick={handleSave}
-          disabled={!results.trim() || loading}
-          className="mt-6 rounded-3xl bg-primary px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Save results
-        </button>
-      </div>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <p className="text-sm text-slate-400">Save result data once it reflects the completed lab findings.</p>
+          <button
+            onClick={handleSave}
+            disabled={!results.trim() || loading}
+            className="btn-primary w-full sm:w-auto"
+          >
+            Save results
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

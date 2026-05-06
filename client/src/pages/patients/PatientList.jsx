@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Eye, Pencil, Trash2, MessageSquare } from 'lucide-react';
 import patientService from '../../services/patientService';
 
 const PatientList = () => {
@@ -24,82 +25,161 @@ const PatientList = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this patient?')) return;
+    try {
+      await patientService.deletePatient(id);
+      loadPatients();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     loadPatients();
   }, [search, gender, bloodGroup, page]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Patient registry</h1>
-          <p className="mt-2 text-slate-600">Search and manage patients across the hospital database.</p>
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="section-title">Patient registry</p>
+            <h1 className="mt-3 text-4xl font-semibold">Manage patient records</h1>
+            <p className="mt-3 max-w-2xl text-[var(--text-secondary)]">Search, filter, and review patient details from a unified premium dashboard.</p>
+          </div>
+          <a href="/patients/new" className="btn-primary inline-flex items-center justify-center">
+            Add patient
+          </a>
         </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search patients"
-          className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none shadow-sm"
-        />
-        <select value={gender} onChange={(event) => setGender(event.target.value)} className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm">
-          <option value="">All genders</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <select value={bloodGroup} onChange={(event) => setBloodGroup(event.target.value)} className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm">
-          <option value="">All blood groups</option>
-          <option value="A+">A+</option>
-          <option value="A-">A-</option>
-          <option value="B+">B+</option>
-          <option value="B-">B-</option>
-          <option value="O+">O+</option>
-          <option value="O-">O-</option>
-          <option value="AB+">AB+</option>
-          <option value="AB-">AB-</option>
-        </select>
-      </div>
-      <div className="mt-6 overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full text-left text-sm text-slate-700">
-          <thead className="bg-slate-50 text-slate-700">
-            <tr>
-              <th className="px-4 py-4">MRH</th>
-              <th className="px-4 py-4">Name</th>
-              <th className="px-4 py-4">Phone</th>
-              <th className="px-4 py-4">Blood group</th>
-              <th className="px-4 py-4">Registered</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading
-              ? Array.from({ length: 6 }).map((_, idx) => (
-                  <tr key={idx} className="border-b border-slate-200 animate-pulse">
-                    <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-16 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200" /></td>
-                  </tr>
-                ))
-              : patients.map((patient) => (
-                  <tr key={patient._id} className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-4 font-medium text-slate-900">{patient.MRH}</td>
-                    <td className="px-4 py-4">{patient.name}</td>
-                    <td className="px-4 py-4">{patient.phone || '—'}</td>
-                    <td className="px-4 py-4">{patient.bloodGroup || '—'}</td>
-                    <td className="px-4 py-4">{new Date(patient.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <div className="text-sm text-slate-600">Showing page {pagination.page} of {Math.ceil(pagination.total / pagination.limit) || 1}</div>
-        <div className="flex gap-3">
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="rounded-3xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-50">Previous</button>
-          <button disabled={page >= Math.ceil(pagination.total / pagination.limit)} onClick={() => setPage(page + 1)} className="rounded-3xl bg-primary px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Next</button>
+
+        <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+          <section className="surface rounded-[1.5rem] border border-[var(--border)] p-6 shadow-sm">
+            <div className="grid gap-4 md:grid-cols-3">
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search patients"
+                className="input-field"
+              />
+              <select value={gender} onChange={(event) => setGender(event.target.value)} className="input-field">
+                <option value="">All genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <select value={bloodGroup} onChange={(event) => setBloodGroup(event.target.value)} className="input-field">
+                <option value="">All blood groups</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
+            </div>
+          </section>
+
+          <aside className="surface rounded-[1.5rem] border border-[var(--border)] p-6 shadow-sm">
+            <p className="section-title">Overview</p>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-[1.5rem] bg-[var(--bg-secondary)] p-5 border border-[var(--border)]">
+                <p className="text-sm text-[var(--text-secondary)]">Total patients</p>
+                <p className="mt-2 text-3xl font-semibold">{pagination.total || patients.length}</p>
+              </div>
+              <div className="rounded-[1.5rem] bg-[var(--bg-secondary)] p-5 border border-[var(--border)]">
+                <p className="text-sm text-[var(--text-secondary)]">Current page</p>
+                <p className="mt-2 text-3xl font-semibold">{pagination.page}</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div className="mt-6 overflow-x-auto rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-1 shadow-sm">
+          <table className="min-w-full text-left text-sm text-[var(--text-secondary)]">
+            <thead className="border-b border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+              <tr>
+                <th className="px-5 py-4">MRH</th>
+                <th className="px-5 py-4">Name</th>
+                <th className="px-5 py-4">Phone</th>
+                <th className="px-5 py-4">Blood group</th>
+                <th className="px-5 py-4">Registered</th>
+                <th className="px-5 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 6 }).map((_, idx) => (
+                    <tr key={idx} className="border-b border-[var(--border)]">
+                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-32 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-16 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
+                    </tr>
+                  ))
+                : patients.map((patient) => (
+                    <tr
+                      key={patient._id}
+                      className="border-b border-[var(--border)] hover:bg-[var(--sidebar-active)] transition cursor-pointer group"
+                      onClick={() => window.location.href = `/patients/profile?id=${patient._id}`}
+                    >
+                      <td className="px-5 py-5 font-semibold text-[var(--text-primary)]">{patient.MRH}</td>
+                      <td className="px-5 py-5 text-[var(--text-primary)]">{patient.name}</td>
+                      <td className="px-5 py-5 text-[var(--text-primary)]">{patient.phone || '—'}</td>
+                      <td className="px-5 py-5 text-[var(--text-primary)]">{patient.bloodGroup || '—'}</td>
+                      <td className="px-5 py-5 text-[var(--text-primary)]">{new Date(patient.createdAt).toLocaleDateString()}</td>
+                      <td className="px-5 py-5 text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); window.location.href = `/patients/profile?id=${patient._id}`; }}
+                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                            title="View"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); window.location.href = `/patients/profile?id=${patient._id}`; }}
+                            className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
+                            title="Edit"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(patient._id); }}
+                            className="rounded-lg p-2 text-red-600 hover:bg-red-50"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); window.location.href = '/consultations'; }}
+                            className="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50 ml-1"
+                            title="Start Consultation"
+                          >
+                            <MessageSquare size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-[var(--text-secondary)]">Page {pagination.page} of {Math.max(Math.ceil(pagination.total / pagination.limit), 1)}</div>
+          <div className="flex flex-wrap gap-3">
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="rounded-3xl border border-[var(--border)] px-4 py-3 text-sm text-[var(--text-primary)] transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-[var(--sidebar-active)]">
+              Previous
+            </button>
+            <button disabled={page >= Math.ceil(pagination.total / pagination.limit)} onClick={() => setPage(page + 1)} className="btn-primary text-sm disabled:cursor-not-allowed disabled:opacity-50">
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

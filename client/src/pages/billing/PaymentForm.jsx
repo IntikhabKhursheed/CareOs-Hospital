@@ -28,51 +28,64 @@ const PaymentForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-950 p-4 sm:p-8 text-slate-100">
       <Toaster position="top-right" />
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Record payment</h1>
-          <p className="mt-2 text-slate-600">Save a payment against an invoice and keep billing status up to date.</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Payments</p>
+          <h1 className="mt-3 text-4xl font-semibold text-white">Record a new payment</h1>
+          <p className="mt-3 max-w-2xl text-slate-400">Log payments securely and keep invoices synced with billing status.</p>
         </div>
       </div>
-      <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <label className="text-sm font-semibold text-slate-700">Bill ID</label>
-        <input
-          type="text"
-          value={billId || ''}
-          readOnly
-          className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900 outline-none"
-        />
 
-        <label className="mt-6 text-sm font-semibold text-slate-700">Amount paid</label>
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900 outline-none"
-          placeholder="Enter payment amount"
-        />
+      <section className="card-glass mx-auto max-w-3xl rounded-3xl border border-slate-800 p-8 shadow-2xl shadow-slate-950/20">
+        <div className="grid gap-6">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Bill ID</p>
+            <input
+              type="text"
+              value={billId || ''}
+              readOnly
+              className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none"
+            />
+          </div>
 
-        <label className="mt-6 text-sm font-semibold text-slate-700">Payment method</label>
-        <select
-          value={method}
-          onChange={(e) => setMethod(e.target.value)}
-          className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900 outline-none"
-        >
-          <option value="card">Card</option>
-          <option value="cash">Cash</option>
-          <option value="insurance">Insurance</option>
-        </select>
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Amount paid</p>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none"
+              placeholder="Enter payment amount"
+            />
+          </div>
 
-        <button
-          onClick={handlePayment}
-          disabled={!amount || loading}
-          className="mt-8 w-full rounded-3xl bg-primary px-5 py-4 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? 'Saving...' : 'Submit payment'}
-        </button>
-      </div>
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Payment method</p>
+            <select
+              value={method}
+              onChange={(e) => setMethod(e.target.value)}
+              className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none"
+            >
+              <option value="card">Card</option>
+              <option value="cash">Cash</option>
+              <option value="insurance">Insurance</option>
+            </select>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-400">Once recorded, payment details will be reflected in the billing ledger.</p>
+            <button
+              onClick={handlePayment}
+              disabled={!amount || loading}
+              className="btn-primary w-full sm:w-auto"
+            >
+              {loading ? 'Saving...' : 'Submit payment'}
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

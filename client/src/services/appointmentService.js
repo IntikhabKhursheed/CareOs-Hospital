@@ -1,35 +1,29 @@
-import axios from 'axios';
+import api from './axiosInstance';
 
-const apiClient = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/appointments`,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  withCredentials: true
-});
+const apiClient = api;
 
 const createAppointment = async (payload) => {
-  const response = await apiClient.post('/', payload);
+  const response = await apiClient.post('/appointments', payload);
   return response.data;
 };
 
 const getAppointments = async (params) => {
-  const response = await apiClient.get('/', { params });
+  const response = await apiClient.get('/appointments', { params });
   return response.data;
 };
 
 const updateStatus = async (id, status) => {
-  const response = await apiClient.put(`/${id}/status`, { status });
+  const response = await apiClient.put(`/appointments/${id}/status`, { status });
   return response.data;
 };
 
 const getDoctorSchedule = async (params) => {
-  const response = await apiClient.get('/schedule', { params });
+  const response = await apiClient.get('/appointments/schedule', { params });
   return response.data;
 };
 
 const getTodayQueue = async () => {
-  const response = await apiClient.get('/queue/today');
+  const response = await apiClient.get('/appointments/queue/today');
   return response.data;
 };
 

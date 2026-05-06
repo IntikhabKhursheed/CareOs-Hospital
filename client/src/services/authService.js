@@ -1,29 +1,29 @@
-import axios from 'axios';
+import api from './axiosInstance';
 
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/auth',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  withCredentials: true
-});
+const apiClient = api;
+
+const register = async (payload) => {
+  const response = await apiClient.post('/auth/register', payload);
+  return response.data;
+};
 
 const login = async (payload) => {
-  const response = await apiClient.post('/login', payload);
+  const response = await apiClient.post('/auth/login', payload);
   return response.data;
 };
 
 const logout = async () => {
-  const response = await apiClient.post('/logout');
+  const response = await apiClient.post('/auth/logout');
   return response.data;
 };
 
 const refreshToken = async () => {
-  const response = await apiClient.post('/refresh-token');
+  const response = await apiClient.post('/auth/refresh-token');
   return response.data;
 };
 
 export default {
+  register,
   login,
   logout,
   refreshToken

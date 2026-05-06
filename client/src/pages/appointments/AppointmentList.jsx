@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import appointmentService from '../../services/appointmentService';
 
+const statusStyles = {
+  scheduled: 'bg-sky-500/15 text-sky-600',
+  checked_in: 'bg-emerald-500/15 text-emerald-600',
+  in_progress: 'bg-amber-500/15 text-amber-600',
+  completed: 'bg-teal-500/15 text-teal-600',
+  cancelled: 'bg-rose-500/15 text-rose-600',
+  no_show: 'bg-slate-700/15 text-slate-200'
+};
+
 const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
   const [search, setSearch] = useState('');
@@ -29,70 +38,105 @@ const AppointmentList = () => {
   }, [search, status, type, page]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Appointment queue</h1>
-          <p className="mt-2 text-slate-600">Track scheduled appointments and manage their statuses.</p>
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="section-title">Appointment queue</p>
+            <h1 className="mt-3 text-4xl font-semibold">Monitor today&apos;s schedule</h1>
+            <p className="mt-3 max-w-2xl text-[var(--text-secondary)]">Filter appointments, review statuses, and keep the care flow moving.</p>
+          </div>
+          <a href="/appointments/new" className="btn-primary inline-flex items-center justify-center">
+            New appointment
+          </a>
         </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-4">
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search appointments" className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none shadow-sm" />
-        <select value={status} onChange={(event) => setStatus(event.target.value)} className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm">
-          <option value="">All statuses</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="checked_in">Checked in</option>
-          <option value="in_progress">In progress</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="no_show">No show</option>
-        </select>
-        <select value={type} onChange={(event) => setType(event.target.value)} className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm">
-          <option value="">All types</option>
-          <option value="new">New</option>
-          <option value="followup">Follow-up</option>
-          <option value="emergency">Emergency</option>
-        </select>
-      </div>
-      <div className="mt-6 overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full text-left text-sm text-slate-700">
-          <thead className="bg-slate-50 text-slate-700">
-            <tr>
-              <th className="px-4 py-4">Patient</th>
-              <th className="px-4 py-4">Doctor</th>
-              <th className="px-4 py-4">Date</th>
-              <th className="px-4 py-4">Status</th>
-              <th className="px-4 py-4">Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading
-              ? Array.from({ length: 6 }).map((_, idx) => (
-                  <tr key={idx} className="border-b border-slate-200 animate-pulse">
-                    <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-16 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-16 rounded bg-slate-200" /></td>
-                  </tr>
-                ))
-              : appointments.map((item) => (
-                  <tr key={item._id} className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-4">{item.patient?.name || 'Unknown'}</td>
-                    <td className="px-4 py-4">{item.doctor?.name || 'Unknown'}</td>
-                    <td className="px-4 py-4">{new Date(item.date).toLocaleDateString()}</td>
-                    <td className="px-4 py-4 capitalize">{item.status.replace('_', ' ')}</td>
-                    <td className="px-4 py-4 capitalize">{item.type}</td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <div className="text-sm text-slate-600">Showing page {pagination.page} of {Math.max(Math.ceil(pagination.total / pagination.limit), 1)}</div>
-        <div className="flex gap-3">
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="rounded-3xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-50">Previous</button>
-          <button disabled={page >= Math.ceil(pagination.total / pagination.limit)} onClick={() => setPage(page + 1)} className="rounded-3xl bg-primary px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Next</button>
+
+        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+          <section className="surface rounded-[1.5rem] border border-[var(--border)] p-6 shadow-sm">
+            <div className="grid gap-4 lg:grid-cols-3">
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search patients or doctors" className="input-dark" />
+              <select value={status} onChange={(event) => setStatus(event.target.value)} className="input-dark">
+                <option value="">All statuses</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="checked_in">Checked in</option>
+                <option value="in_progress">In progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="no_show">No show</option>
+              </select>
+              <select value={type} onChange={(event) => setType(event.target.value)} className="input-dark">
+                <option value="">All types</option>
+                <option value="new">New</option>
+                <option value="followup">Follow-up</option>
+                <option value="emergency">Emergency</option>
+              </select>
+            </div>
+          </section>
+
+          <section className="surface rounded-[1.5rem] border border-[var(--border)] p-6 shadow-sm">
+            <p className="section-title">Today&apos;s overview</p>
+            <div className="mt-6 grid gap-4">
+              <div className="rounded-[1.5rem] bg-[var(--bg-secondary)] p-5 border border-[var(--border)]">
+                <p className="text-sm text-[var(--text-secondary)]">Total appointments</p>
+                <p className="mt-2 text-3xl font-semibold">{pagination.total || appointments.length}</p>
+              </div>
+              <div className="rounded-[1.5rem] bg-[var(--bg-secondary)] p-5 border border-[var(--border)]">
+                <p className="text-sm text-[var(--text-secondary)]">Current page</p>
+                <p className="mt-2 text-3xl font-semibold">{pagination.page}</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-6 overflow-x-auto rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-1 shadow-sm">
+          <table className="min-w-full text-left text-sm text-[var(--text-secondary)]">
+            <thead className="border-b border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+              <tr>
+                <th className="px-5 py-4">Patient</th>
+                <th className="px-5 py-4">Doctor</th>
+                <th className="px-5 py-4">Date</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 6 }).map((_, idx) => (
+                    <tr key={idx} className="border-b border-[var(--border)]">
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-28 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
+                    </tr>
+                  ))
+                : appointments.map((item) => (
+                    <tr key={item._id} className="border-b border-[var(--border)] hover:bg-[var(--sidebar-active)] transition">
+                      <td className="px-5 py-5 font-semibold text-[var(--text-primary)]">{item.patient?.name || 'Unknown'}</td>
+                      <td className="px-5 py-5 text-[var(--text-secondary)]">{item.doctor?.name || 'Unknown'}</td>
+                      <td className="px-5 py-5 text-[var(--text-secondary)]">{new Date(item.date).toLocaleDateString()}</td>
+                      <td className="px-5 py-5">
+                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[item.status] || 'bg-slate-700/25 text-slate-200'}`}>
+                          {item.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-5 py-5 capitalize text-[var(--text-secondary)]">{item.type}</td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-[var(--text-secondary)]">Page {pagination.page} of {Math.max(Math.ceil(pagination.total / pagination.limit), 1)}</div>
+          <div className="flex flex-wrap gap-3">
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="rounded-3xl border border-[var(--border)] px-4 py-3 text-sm text-[var(--text-primary)] transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-[var(--sidebar-active)]">
+              Previous
+            </button>
+            <button disabled={page >= Math.ceil(pagination.total / pagination.limit)} onClick={() => setPage(page + 1)} className="btn-primary text-sm disabled:cursor-not-allowed disabled:opacity-50">
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

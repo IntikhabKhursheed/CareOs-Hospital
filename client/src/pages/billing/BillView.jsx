@@ -38,44 +38,48 @@ const BillView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-950 p-4 sm:p-8 text-slate-100">
       <Toaster position="top-right" />
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Billing overview</h1>
-          <p className="mt-2 text-slate-600">Review invoices, track payment status, and export bills directly.</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Billing dashboard</p>
+          <h1 className="mt-3 text-4xl font-semibold text-white">Invoices and payments</h1>
+          <p className="mt-3 max-w-2xl text-slate-400">Review billing history, export invoices, and manage payments from one secure interface.</p>
         </div>
-        <a href="/billing/pay" className="rounded-3xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-900">Record payment</a>
+        <a href="/billing/pay" className="btn-primary inline-flex items-center justify-center">
+          Record payment
+        </a>
       </div>
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <table className="min-w-full text-left text-sm text-slate-700">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-700">
+
+      <section className="card-glass overflow-x-auto rounded-3xl border border-slate-800 p-1 shadow-2xl shadow-slate-950/20">
+        <table className="min-w-full text-left text-sm text-slate-200">
+          <thead className="border-b border-slate-800 bg-slate-900 text-slate-400">
             <tr>
-              <th className="px-4 py-3">Bill</th>
-              <th className="px-4 py-3">Patient</th>
-              <th className="px-4 py-3">Amount</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className="px-5 py-4">Bill</th>
+              <th className="px-5 py-4">Patient</th>
+              <th className="px-5 py-4">Amount</th>
+              <th className="px-5 py-4">Status</th>
+              <th className="px-5 py-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading
               ? Array.from({ length: 5 }).map((_, idx) => (
-                  <tr key={idx} className="animate-pulse border-b border-slate-200">
-                    <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-16 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200" /></td>
+                  <tr key={idx} className="border-b border-slate-800">
+                    <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-800" /></td>
+                    <td className="px-5 py-5"><div className="h-4 w-32 rounded bg-slate-800" /></td>
+                    <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-800" /></td>
+                    <td className="px-5 py-5"><div className="h-4 w-28 rounded bg-slate-800" /></td>
+                    <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-800" /></td>
                   </tr>
                 ))
               : bills.map((bill) => (
-                  <tr key={bill._id} className="border-b border-slate-200 hover:bg-slate-50">
-                    <td className="px-4 py-4">{bill._id.slice(-6)}</td>
-                    <td className="px-4 py-4">{bill.patient?.name || 'Unknown'}</td>
-                    <td className="px-4 py-4">${bill.total.toFixed(2)}</td>
-                    <td className="px-4 py-4 capitalize">{bill.status}</td>
-                    <td className="px-4 py-4">
+                  <tr key={bill._id} className="border-b border-slate-800 hover:bg-slate-900/70 transition">
+                    <td className="px-5 py-5 font-semibold text-slate-100">{bill._id.slice(-6)}</td>
+                    <td className="px-5 py-5 text-slate-300">{bill.patient?.name || 'Unknown'}</td>
+                    <td className="px-5 py-5 text-slate-300">${bill.total.toFixed(2)}</td>
+                    <td className="px-5 py-5 capitalize text-slate-300">{bill.status}</td>
+                    <td className="px-5 py-5">
                       <button
                         onClick={() => downloadPdf(bill)}
                         className="rounded-2xl border border-primary px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary hover:text-white"
@@ -87,7 +91,7 @@ const BillView = () => {
                 ))}
           </tbody>
         </table>
-      </div>
+      </section>
     </div>
   );
 };

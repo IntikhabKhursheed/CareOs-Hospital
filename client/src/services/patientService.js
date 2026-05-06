@@ -1,35 +1,34 @@
-import axios from 'axios';
+import api from './axiosInstance';
 
-const apiClient = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/patients`,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  withCredentials: true
-});
+const apiClient = api;
 
 const createPatient = async (payload) => {
-  const response = await apiClient.post('/', payload);
+  const response = await apiClient.post('/patients', payload);
   return response.data;
 };
 
 const getPatients = async (params) => {
-  const response = await apiClient.get('/', { params });
+  const response = await apiClient.get('/patients', { params });
   return response.data;
 };
 
 const getPatientById = async (id) => {
-  const response = await apiClient.get(`/${id}`);
+  const response = await apiClient.get(`/patients/${id}`);
   return response.data;
 };
 
 const updatePatient = async (id, payload) => {
-  const response = await apiClient.put(`/${id}`, payload);
+  const response = await apiClient.put(`/patients/${id}`, payload);
   return response.data;
 };
 
 const getPatientHistory = async (id) => {
-  const response = await apiClient.get(`/${id}/history`);
+  const response = await apiClient.get(`/patients/${id}/history`);
+  return response.data;
+};
+
+const deletePatient = async (id) => {
+  const response = await apiClient.delete(`/patients/${id}`);
   return response.data;
 };
 
@@ -38,5 +37,6 @@ export default {
   getPatients,
   getPatientById,
   updatePatient,
-  getPatientHistory
+  getPatientHistory,
+  deletePatient
 };
