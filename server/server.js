@@ -42,7 +42,7 @@ app.use(compression());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 500,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -52,9 +52,10 @@ const limiter = rateLimit({
   }
 });
 
+app.use('/api/auth', authRoutes);
+
 app.use(limiter);
 
-app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/ai', aiRoutes);

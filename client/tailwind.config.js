@@ -1,5 +1,6 @@
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  darkMode: ['class', 'html[data-theme="dark"] &'],
   theme: {
     extend: {
       colors: {

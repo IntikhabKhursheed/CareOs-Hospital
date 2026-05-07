@@ -7,7 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 const EmptyState = ({ icon, text }) => (
   <div className="flex flex-col items-center justify-center py-8 text-[var(--text-secondary)]">
-    <div className="mb-3 text-slate-400">{icon}</div>
+    <div className="mb-3 text-[var(--text-secondary)] opacity-60">{icon}</div>
     <p className="text-sm">{text}</p>
   </div>
 );

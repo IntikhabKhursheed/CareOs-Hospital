@@ -43,11 +43,11 @@ const QueueDisplay = () => {
                 <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Token</p>
                 <span className="rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-1 text-sm text-[var(--text-primary)]">{loading ? '—' : item.tokenNumber}</span>
               </div>
-              <h2 className="text-2xl font-semibold">{loading ? <span className="h-8 w-40 rounded bg-slate-200/70" /> : item.patient?.name || 'Unknown'}</h2>
+              <h2 className="text-2xl font-semibold">{loading ? <span className="h-8 w-40 rounded bg-[var(--bg-secondary)]/60" /> : item.patient?.name || 'Unknown'}</h2>
               <div className="mt-6 space-y-3 text-sm text-[var(--text-secondary)]">
                 <p>
                   <span className="font-semibold text-[var(--text-primary)]">Doctor:</span>{' '}
-                  {loading ? <span className="inline-block h-4 w-28 rounded bg-slate-200/70" /> : item.doctor?.name || 'Unknown'}
+                  {loading ? <span className="inline-block h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /> : item.doctor?.name || 'Unknown'}
                 </p>
                 <p>
                   <span className="font-semibold text-[var(--text-primary)]">Status:</span>{' '}
@@ -55,7 +55,7 @@ const QueueDisplay = () => {
                 </p>
                 <p>
                   <span className="font-semibold text-[var(--text-primary)]">Time:</span>{' '}
-                  {loading ? <span className="inline-block h-4 w-20 rounded bg-slate-200/70" /> : item.timeSlot || 'TBD'}
+                  {loading ? <span className="inline-block h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /> : item.timeSlot || 'TBD'}
                 </p>
               </div>
             </article>

@@ -28,17 +28,17 @@ const PaymentForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 sm:p-8 text-slate-100">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
       <Toaster position="top-right" />
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Payments</p>
-          <h1 className="mt-3 text-4xl font-semibold text-white">Record a new payment</h1>
-          <p className="mt-3 max-w-2xl text-slate-400">Log payments securely and keep invoices synced with billing status.</p>
+          <h1 className="mt-3 text-4xl font-semibold text-slate-900">Record a new payment</h1>
+          <p className="mt-3 max-w-2xl text-slate-600">Log payments securely and keep invoices synced with billing status.</p>
         </div>
       </div>
 
-      <section className="card-glass mx-auto max-w-3xl rounded-3xl border border-slate-800 p-8 shadow-2xl shadow-slate-950/20">
+      <section className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="grid gap-6">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Bill ID</p>
@@ -46,7 +46,7 @@ const PaymentForm = () => {
               type="text"
               value={billId || ''}
               readOnly
-              className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none"
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-gray-50 p-4 text-sm text-slate-900 outline-none"
             />
           </div>
 
@@ -56,7 +56,7 @@ const PaymentForm = () => {
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none"
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-gray-50 p-4 text-sm text-slate-900 outline-none"
               placeholder="Enter payment amount"
             />
           </div>
@@ -66,7 +66,7 @@ const PaymentForm = () => {
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value)}
-              className="mt-3 w-full rounded-3xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-100 outline-none"
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-gray-50 p-4 text-sm text-slate-900 outline-none"
             >
               <option value="card">Card</option>
               <option value="cash">Cash</option>
@@ -75,7 +75,7 @@ const PaymentForm = () => {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-slate-400">Once recorded, payment details will be reflected in the billing ledger.</p>
+            <p className="text-sm text-slate-500">Once recorded, payment details will be reflected in the billing ledger.</p>
             <button
               onClick={handlePayment}
               disabled={!amount || loading}

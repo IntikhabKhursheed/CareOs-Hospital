@@ -32,6 +32,16 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // 429 Too Many Requests — retry with exponential backoff
+    if (error.response?.status === 429) {
+      originalRequest._retryCount = originalRequest._retryCount || 0;
+      if (originalRequest._retryCount < 3) {
+        originalRequest._retryCount += 1;
+        const delay = 2000 * Math.pow(2, originalRequest._retryCount - 1); // 2s, 4s, 8s
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return api(originalRequest);
+      }
+    }
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       if (!isRefreshing) {

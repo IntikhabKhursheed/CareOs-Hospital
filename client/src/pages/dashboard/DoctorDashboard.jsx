@@ -73,9 +73,9 @@ const DoctorDashboard = () => {
                   {loading
                     ? Array.from({ length: 4 }).map((_, idx) => (
                         <tr className="border-b border-[var(--border)]" key={idx}>
-                          <td className="px-4 py-4"><div className="h-4 w-28 rounded bg-slate-200/70" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
                         </tr>
                       ))
                     : appointments.map((item) => (

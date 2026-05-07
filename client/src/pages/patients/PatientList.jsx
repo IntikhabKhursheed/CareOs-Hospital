@@ -113,12 +113,12 @@ const PatientList = () => {
               {loading
                 ? Array.from({ length: 6 }).map((_, idx) => (
                     <tr key={idx} className="border-b border-[var(--border)]">
-                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-32 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-16 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-32 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-16 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
                     </tr>
                   ))
                 : patients.map((patient) => (
@@ -133,34 +133,24 @@ const PatientList = () => {
                       <td className="px-5 py-5 text-[var(--text-primary)]">{patient.bloodGroup || '—'}</td>
                       <td className="px-5 py-5 text-[var(--text-primary)]">{new Date(patient.createdAt).toLocaleDateString()}</td>
                       <td className="px-5 py-5 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={(e) => { e.stopPropagation(); window.location.href = `/patients/profile?id=${patient._id}`; }}
-                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-                            title="View"
+                            className="inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--bg-card)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
                           >
-                            <Eye size={16} />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); window.location.href = `/patients/profile?id=${patient._id}`; }}
-                            className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
-                            title="Edit"
-                          >
-                            <Pencil size={16} />
+                            View
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(patient._id); }}
-                            className="rounded-lg p-2 text-red-600 hover:bg-red-50"
-                            title="Delete"
+                            className="inline-flex items-center rounded-md border border-red-300 bg-[var(--bg-card)] px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
                           >
-                            <Trash2 size={16} />
+                            Delete
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); window.location.href = '/consultations'; }}
-                            className="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50 ml-1"
-                            title="Start Consultation"
+                            onClick={(e) => { e.stopPropagation(); window.location.href = `/consultation/${patient._id}`; }}
+                            className="inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700"
                           >
-                            <MessageSquare size={16} />
+                            Consult
                           </button>
                         </div>
                       </td>

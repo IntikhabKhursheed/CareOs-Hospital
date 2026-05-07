@@ -56,13 +56,10 @@ const getNavItems = (role) => {
 function App() {
   const { user, logout } = useContext(AuthContext);
   const path = window.location.pathname;
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('careos_theme') === 'dark' ? 'dark' : 'light';
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('careos_theme');
-    setTheme(stored === 'dark' ? 'dark' : 'light');
-  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -77,6 +74,7 @@ function App() {
     if (path === '/login') return <Login />;
     if (path === '/dashboard') return user?.role === 'doctor' ? <DoctorDashboard /> : <AdminDashboard />;
     if (path === '/consultations') return <ConsultationScreen />;
+    if (path.startsWith('/consultation/')) return <ConsultationScreen />;
     if (path === '/lab') return <LabQueue />;
     if (path.startsWith('/lab/result')) return <ResultEntry />;
     if (path === '/billing') return <BillView />;

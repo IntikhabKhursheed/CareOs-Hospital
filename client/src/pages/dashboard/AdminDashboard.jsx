@@ -55,11 +55,31 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('new_appointment', handleNewAppointment);
   }, []);
 
+  const formatReport = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
+      .replace(/^\* (.+)$/gm, '<li class="flex items-start gap-2 text-sm" style="color:var(--text-secondary)"><span style="color:var(--accent)" class="mt-1">•</span><span>$1</span></li>')
+      .replace(/(<li.*<\/li>\n?)+/g, '<ul class="space-y-2 my-3">$&</ul>')
+      .split('\n\n')
+      .map(para => para.startsWith('<') ? para :
+        `<p class="text-sm leading-relaxed mb-3" style="color:var(--text-secondary)">${para}</p>`)
+      .join('');
+  };
+
   const handleGenerateWeeklyReport = async () => {
     setAiLoading(true);
     setAiResult('');
     try {
-      const response = await aiService.generateWeeklyReportV2();
+      const response = await aiService.generateWeeklyReport({
+        weeklyStats: {
+          opdCount: 10,
+          ipdCount: 3,
+          revenue: 50000,
+          labTests: 15,
+          topDiagnoses: ["Fever", "Hypertension", "Diabetes"]
+        }
+      });
       setAiResult(response.data?.report || response.message || JSON.stringify(response.data));
       setShowAiModal(true);
     } catch (error) {
@@ -89,11 +109,11 @@ const AdminDashboard = () => {
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {statCards.map((card) => (
-              <div key={card.title} className="rounded-xl border border-slate-200 bg-[var(--bg-card)] p-6 shadow-sm transition hover:shadow-md">
+              <div key={card.title} className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm transition hover:shadow-md">
                 <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.iconBg} ${card.iconColor}`}>
                   {card.icon}
                 </div>
-                <p className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">{card.title}</p>
+                <p className="mt-4 text-xs font-medium uppercase tracking-wide text-[var(--text-secondary)]">{card.title}</p>
                 <p className="mt-1 text-[32px] font-bold text-[var(--text-primary)]">{loading ? '—' : card.label === 'revenue' ? `$${kpis[card.label]}` : kpis[card.label]}</p>
                 <div className="mt-1 flex items-center gap-1 text-xs text-emerald-600">
                   <TrendingUp size={14} />
@@ -159,10 +179,10 @@ const AdminDashboard = () => {
                   {loading
                     ? Array.from({ length: 4 }).map((_, idx) => (
                         <tr key={idx} className="border-b border-[var(--border)]">
-                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200/60" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-slate-200/60" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-slate-200/60" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-16 rounded bg-slate-200/60" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
+                          <td className="px-4 py-4"><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></td>
                         </tr>
                       ))
                     : recentAppointments.map((item) => (
@@ -200,15 +220,66 @@ const AdminDashboard = () => {
 
       {showAiModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-2xl rounded-xl bg-[var(--bg-card)] border border-[var(--border)] shadow-lg">
-            <div className="flex items-center justify-between border-b border-[var(--border)] p-4">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">AI Weekly Report</h3>
-              <button onClick={() => setShowAiModal(false)} className="rounded-lg p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]">
-                <X size={18} />
+          <div className="w-full max-w-2xl rounded-xl bg-[var(--bg-card)] shadow-xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles size={20} className="text-white" />
+                  <h3 className="text-lg font-bold text-white">AI Weekly Report</h3>
+                </div>
+                <p className="text-indigo-100 text-sm">Generated by Grok AI · {new Date().toLocaleDateString()}</p>
+              </div>
+              <button
+                onClick={() => setShowAiModal(false)}
+                className="rounded-lg p-2 text-white/80 hover:text-white hover:bg-white/10 transition"
+              >
+                <X size={20} />
               </button>
             </div>
-            <div className="max-h-[70vh] overflow-y-auto p-6">
-              <pre className="whitespace-pre-wrap text-sm text-[var(--text-primary)]">{aiResult}</pre>
+            {/* Body */}
+            <div className="max-h-[500px] overflow-y-auto p-6">
+              <div
+                dangerouslySetInnerHTML={{ __html: formatReport(aiResult) }}
+                className="prose prose-sm max-w-none"
+              />
+            </div>
+            {/* Footer */}
+            <div className="bg-[var(--bg-secondary)] border-t border-[var(--border)] px-6 py-4 flex items-center justify-between">
+              <span className="text-xs text-[var(--text-secondary)]">Codnocrats Innovating Solutions</span>
+              <button
+                onClick={() => {
+                  const w = window.open('', '_blank');
+                  w.document.write(`
+                    <html>
+                      <head>
+                        <title>Weekly Report</title>
+                        <style>
+                          body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #334155; }
+                          h1 { color: #1e1b4b; font-size: 24px; margin-bottom: 8px; }
+                          .meta { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+                          strong { color: #0f172a; }
+                          ul { padding-left: 0; list-style: none; margin: 12px 0; }
+                          li { margin-bottom: 6px; }
+                          .dot { color: #4f46e5; margin-right: 8px; }
+                          p { line-height: 1.6; margin: 0 0 12px 0; }
+                        </style>
+                      </head>
+                      <body>
+                        <h1>AI Weekly Report</h1>
+                        <p class="meta">Generated by Grok AI · ${new Date().toLocaleDateString()}</p>
+                        ${formatReport(aiResult)}
+                      </body>
+                    </html>
+                  `);
+                  w.document.close();
+                  w.focus();
+                  setTimeout(() => w.print(), 250);
+                }}
+                className="px-4 py-2 text-sm font-medium text-indigo-600 border border-[var(--border)] rounded-lg hover:bg-[var(--sidebar-active)] transition"
+              >
+                Download PDF
+              </button>
             </div>
           </div>
         </div>

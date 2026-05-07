@@ -66,30 +66,30 @@ const Login = () => {
     return (
       <div className="min-h-screen flex">
         {brandSide}
-        <div className="flex-1 flex items-center justify-center bg-white p-6">
+        <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
           <div className="w-full max-w-md">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Create Account</h2>
-            <p className="text-slate-500 mb-8">Register for CareOS access</p>
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Create Account</h2>
+            <p className="text-[var(--text-secondary)] mb-8">Register for CareOS access</p>
             <form className="space-y-4" onSubmit={handleRegisterSubmit}>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                <input name="name" type="text" value={registerData.name} onChange={handleRegisterChange} required className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none" placeholder="John Doe" />
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Full Name</label>
+                <input name="name" type="text" value={registerData.name} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="John Doe" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                <input name="email" type="email" value={registerData.email} onChange={handleRegisterChange} required className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none" placeholder="you@example.com" />
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
+                <input name="email" type="email" value={registerData.email} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="you@example.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
-                <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange} required className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none" placeholder="Enter password" />
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Password</label>
+                <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="Enter password" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
-                <input name="phone" type="tel" value={registerData.phone} onChange={handleRegisterChange} required className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none" placeholder="+1234567890" />
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Phone</label>
+                <input name="phone" type="tel" value={registerData.phone} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="+1234567890" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Role</label>
-                <select name="role" value={registerData.role} onChange={handleRegisterChange} className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Role</label>
+                <select name="role" value={registerData.role} onChange={handleRegisterChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none">
                   <option value="patient">Patient</option>
                   <option value="doctor">Doctor</option>
                   <option value="nurse">Nurse</option>
@@ -113,22 +113,22 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {brandSide}
-      <div className="flex-1 flex items-center justify-center bg-white p-6">
+      <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
         <div className="w-full max-w-md">
-          <h2 className="text-[28px] font-bold text-slate-900 mb-2">Welcome back</h2>
-          <p className="text-slate-500 mb-8">Sign in to your account</p>
+          <h2 className="text-[28px] font-bold text-[var(--text-primary)] mb-2">Welcome back</h2>
+          <p className="text-[var(--text-secondary)] mb-8">Sign in to your account</p>
 
           <form className="space-y-5" onSubmit={handleLoginSubmit}>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-              <input name="email" type="email" value={formData.email} onChange={handleLoginChange} required className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none" placeholder="admin@careos.com" />
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
+              <input name="email" type="email" value={formData.email} onChange={handleLoginChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="admin@careos.com" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Password</label>
               <div className="relative">
-                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleLoginChange} required className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none pr-10" placeholder="Enter your password" />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleLoginChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none pr-10" placeholder="Enter your password" />
+                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -147,18 +147,18 @@ const Login = () => {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
+              <div className="w-full border-t border-[var(--border)]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-3 text-slate-500">or</span>
+              <span className="bg-[var(--bg-primary)] px-3 text-[var(--text-secondary)]">or</span>
             </div>
           </div>
 
-          <button onClick={() => setShowRegister(true)} className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+          <button onClick={() => setShowRegister(true)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition">
             Create Account
           </button>
 
-          <p className="mt-8 text-center text-xs text-slate-400">
+          <p className="mt-8 text-center text-xs text-[var(--text-secondary)]">
             Demo: admin@careos.com / Admin@123
           </p>
         </div>

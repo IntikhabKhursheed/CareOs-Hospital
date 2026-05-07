@@ -7,7 +7,7 @@ const statusStyles = {
   in_progress: 'bg-amber-500/15 text-amber-600',
   completed: 'bg-teal-500/15 text-teal-600',
   cancelled: 'bg-rose-500/15 text-rose-600',
-  no_show: 'bg-slate-700/15 text-slate-200'
+  no_show: 'bg-slate-500/15 text-slate-500'
 };
 
 const AppointmentList = () => {
@@ -103,11 +103,11 @@ const AppointmentList = () => {
               {loading
                 ? Array.from({ length: 6 }).map((_, idx) => (
                     <tr key={idx} className="border-b border-[var(--border)]">
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-28 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-slate-200/70" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-slate-200/70" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
+                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
                     </tr>
                   ))
                 : appointments.map((item) => (
@@ -116,7 +116,7 @@ const AppointmentList = () => {
                       <td className="px-5 py-5 text-[var(--text-secondary)]">{item.doctor?.name || 'Unknown'}</td>
                       <td className="px-5 py-5 text-[var(--text-secondary)]">{new Date(item.date).toLocaleDateString()}</td>
                       <td className="px-5 py-5">
-                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[item.status] || 'bg-slate-700/25 text-slate-200'}`}>
+                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[item.status] || 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}>
                           {item.status.replace('_', ' ')}
                         </span>
                       </td>
