@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Eye, Pencil, Trash2, MessageSquare } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import patientService from '../../services/patientService';
+import { DataTable, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
+import { navigateTo } from '../../utils/navigation';
 
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
@@ -11,16 +12,21 @@ const PatientList = () => {
   const [limit] = useState(10);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit });
   const [loading, setLoading] = useState(true);
+  const latestRequestRef = useRef(0);
 
   const loadPatients = async () => {
+    const requestId = latestRequestRef.current + 1;
+    latestRequestRef.current = requestId;
     setLoading(true);
     try {
       const response = await patientService.getPatients({ search, gender, bloodGroup, page, limit });
+      if (latestRequestRef.current !== requestId) return;
       setPatients(response.data.patients);
       setPagination(response.data.pagination);
     } catch (error) {
       console.error(error);
     } finally {
+      if (latestRequestRef.current !== requestId) return;
       setLoading(false);
     }
   };
@@ -97,67 +103,70 @@ const PatientList = () => {
           </aside>
         </div>
 
-        <div className="mt-6 overflow-x-auto rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-1 shadow-sm">
-          <table className="min-w-full text-left text-sm text-[var(--text-secondary)]">
-            <thead className="border-b border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+        <div className="mt-6">
+          <TableContainer>
+            <DataTable>
+            <TableHead>
               <tr>
-                <th className="px-5 py-4">MRH</th>
-                <th className="px-5 py-4">Name</th>
-                <th className="px-5 py-4">Phone</th>
-                <th className="px-5 py-4">Blood group</th>
-                <th className="px-5 py-4">Registered</th>
-                <th className="px-5 py-4 text-right">Actions</th>
+                <TableHeader sortable sorted>MRH</TableHeader>
+                <TableHeader>Name</TableHeader>
+                <TableHeader sortable>Phone</TableHeader>
+                <TableHeader>Blood group</TableHeader>
+                <TableHeader sortable>Registered</TableHeader>
+                <TableHeader align="right">Actions</TableHeader>
               </tr>
-            </thead>
+            </TableHead>
             <tbody>
               {loading
                 ? Array.from({ length: 6 }).map((_, idx) => (
-                    <tr key={idx} className="border-b border-[var(--border)]">
-                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-32 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-16 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                    </tr>
+                    <TableRow key={idx}>
+                      <TableCell><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-32 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-16 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell align="right"><div className="ml-auto h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                    </TableRow>
                   ))
                 : patients.map((patient) => (
-                    <tr
+                    <TableRow
                       key={patient._id}
-                      className="border-b border-[var(--border)] hover:bg-[var(--sidebar-active)] transition cursor-pointer group"
-                      onClick={() => window.location.href = `/patients/profile?id=${patient._id}`}
+                      interactive
+                      className="group"
+                      onClick={() => navigateTo(`/patients/profile?id=${patient._id}`)}
                     >
-                      <td className="px-5 py-5 font-semibold text-[var(--text-primary)]">{patient.MRH}</td>
-                      <td className="px-5 py-5 text-[var(--text-primary)]">{patient.name}</td>
-                      <td className="px-5 py-5 text-[var(--text-primary)]">{patient.phone || '—'}</td>
-                      <td className="px-5 py-5 text-[var(--text-primary)]">{patient.bloodGroup || '—'}</td>
-                      <td className="px-5 py-5 text-[var(--text-primary)]">{new Date(patient.createdAt).toLocaleDateString()}</td>
-                      <td className="px-5 py-5 text-right">
+                      <TableCell className="font-semibold text-[var(--text-primary)]">{patient.MRH}</TableCell>
+                      <TableCell className="text-[var(--text-primary)]">{patient.name}</TableCell>
+                      <TableCell className="text-[var(--text-primary)]">{patient.phone || '—'}</TableCell>
+                      <TableCell className="text-[var(--text-primary)]">{patient.bloodGroup || '—'}</TableCell>
+                      <TableCell className="text-[var(--text-primary)]">{new Date(patient.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell align="right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={(e) => { e.stopPropagation(); window.location.href = `/patients/profile?id=${patient._id}`; }}
-                            className="inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--bg-card)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
+                            onClick={(e) => { e.stopPropagation(); navigateTo(`/patients/profile?id=${patient._id}`); }}
+                            className="table-focusable inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--bg-card)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
                           >
                             View
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(patient._id); }}
-                            className="inline-flex items-center rounded-md border border-red-300 bg-[var(--bg-card)] px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                            className="table-focusable inline-flex items-center rounded-md border border-red-300 bg-[var(--bg-card)] px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
                           >
                             Delete
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); window.location.href = `/consultation/${patient._id}`; }}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700"
+                            onClick={(e) => { e.stopPropagation(); navigateTo(`/consultation/${patient._id}`); }}
+                            className="table-focusable inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700"
                           >
                             Consult
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
             </tbody>
-          </table>
+          </DataTable>
+          </TableContainer>
         </div>
 
         <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">

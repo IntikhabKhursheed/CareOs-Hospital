@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { navigateTo } from '../utils/navigation';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
@@ -64,7 +65,7 @@ api.interceptors.response.use(
           isRefreshing = false;
           localStorage.removeItem('careos_token');
           localStorage.removeItem('careos_user');
-          window.location.href = '/login';
+          navigateTo('/login', { replace: true });
           return Promise.reject(refreshError);
         }
       }

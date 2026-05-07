@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import appointmentService from '../../services/appointmentService';
 import patientService from '../../services/patientService';
 import aiService from '../../services/aiService';
+import { DataTable, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
 
 const statCards = [
   { title: 'Patients Today', label: 'patientsToday', icon: <Users size={20} />, iconBg: 'bg-indigo-100', iconColor: 'text-indigo-600' },
@@ -165,36 +166,38 @@ const AdminDashboard = () => {
               <span className="rounded-full bg-[var(--bg-secondary)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Updated now</span>
             </div>
 
-            <div className="mt-8 overflow-x-auto">
-              <table className="min-w-full text-left text-sm text-[var(--text-secondary)]">
-                <thead className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+            <div className="mt-8">
+              <TableContainer>
+                <DataTable>
+                <TableHead>
                   <tr>
-                    <th className="px-4 py-3">Patient</th>
-                    <th className="px-4 py-3">Doctor</th>
-                    <th className="px-4 py-3">Date</th>
-                    <th className="px-4 py-3">Status</th>
+                    <TableHeader sortable sorted>Patient</TableHeader>
+                    <TableHeader sortable>Doctor</TableHeader>
+                    <TableHeader sortable>Date</TableHeader>
+                    <TableHeader>Status</TableHeader>
                   </tr>
-                </thead>
+                </TableHead>
                 <tbody>
                   {loading
                     ? Array.from({ length: 4 }).map((_, idx) => (
-                        <tr key={idx} className="border-b border-[var(--border)]">
-                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
-                          <td className="px-4 py-4"><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></td>
-                        </tr>
+                        <TableRow key={idx}>
+                          <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                          <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                          <TableCell><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                          <TableCell><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                        </TableRow>
                       ))
                     : recentAppointments.map((item) => (
-                        <tr key={item._id} className="border-b border-[var(--border)] hover:bg-[var(--sidebar-active)] transition">
-                          <td className="px-4 py-4 font-semibold text-[var(--text-primary)]">{item.patient?.name || 'Unknown'}</td>
-                          <td className="px-4 py-4 text-[var(--text-secondary)]">{item.doctor?.name || 'Unknown'}</td>
-                          <td className="px-4 py-4 text-[var(--text-secondary)]">{new Date(item.date).toLocaleDateString()}</td>
-                          <td className="px-4 py-4 text-[var(--text-primary)] capitalize">{item.status?.replace('_', ' ')}</td>
-                        </tr>
+                        <TableRow key={item._id}>
+                          <TableCell className="font-semibold text-[var(--text-primary)]">{item.patient?.name || 'Unknown'}</TableCell>
+                          <TableCell>{item.doctor?.name || 'Unknown'}</TableCell>
+                          <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-[var(--text-primary)] capitalize">{item.status?.replace('_', ' ')}</TableCell>
+                        </TableRow>
                       ))}
                 </tbody>
-              </table>
+              </DataTable>
+              </TableContainer>
             </div>
           </section>
 

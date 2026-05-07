@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Receipt, Plus, AlertCircle } from 'lucide-react'
-import api from '../../services/axiosInstance'
+import billingService from '../../services/billingService'
 
 export default function BillView() {
   const [bills, setBills] = useState([])
@@ -8,17 +8,26 @@ export default function BillView() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    let isMounted = true
+
     const fetchBills = async () => {
       try {
-        const res = await api.get('/billing')
-        setBills(res.data?.data?.bills || res.data?.data || [])
+        const res = await billingService.getBills()
+        if (!isMounted) return
+        setBills(res?.data?.bills || res?.data || [])
       } catch (err) {
+        if (!isMounted) return
         setError('Could not load billing data')
       } finally {
+        if (!isMounted) return
         setLoading(false)
       }
     }
+
     fetchBills()
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   if (loading) return (

@@ -4,7 +4,8 @@ const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOp
   return (
     <>
       {/* Desktop sidebar — always visible on lg+ */}
-      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 flex-col border-r border-[var(--border)] bg-[var(--sidebar-bg)] shadow-sm lg:flex">
+      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 flex-col p-4 lg:flex">
+        <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--sidebar-bg)] shadow-[var(--shadow)]">
         <SidebarContent
           navItems={navItems}
           user={user}
@@ -13,14 +14,16 @@ const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOp
           toggleTheme={toggleTheme}
           logout={logout}
         />
+        </div>
       </aside>
 
       {/* Mobile sidebar — off-canvas slide */}
       <aside
-        className={`fixed left-0 top-0 z-30 flex h-screen w-72 flex-col border-r border-[var(--border)] bg-[var(--sidebar-bg)] shadow-xl transition-transform duration-300 lg:hidden ${
+        className={`fixed left-0 top-0 z-30 flex h-screen w-72 flex-col p-3 transition-transform duration-300 lg:hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--sidebar-bg)] shadow-[var(--shadow)]">
         <div className="flex items-center justify-end px-4 pt-4">
           <button
             onClick={onClose}
@@ -37,6 +40,7 @@ const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOp
           toggleTheme={toggleTheme}
           logout={logout}
         />
+        </div>
       </aside>
     </>
   );
@@ -46,20 +50,20 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="px-6 py-6">
+      <div className="px-5 py-5">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-sm">
             <span className="text-lg font-bold">+</span>
           </div>
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">CareOS</p>
-            <h1 className="truncate text-base font-semibold leading-tight text-[var(--text-primary)]">Hospital Management</h1>
+            <h1 className="truncate text-sm font-semibold leading-tight text-[var(--text-primary)]">Hospital Management</h1>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-2">
+      <nav className="flex-1 overflow-y-auto px-3 py-2">
         <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = currentPath === item.path;
@@ -67,7 +71,7 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
               <li key={item.path}>
                 <a
                   href={item.path}
-                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)]'
                       : 'text-[var(--text-secondary)] hover:bg-[var(--sidebar-active)]/50 hover:text-[var(--text-primary)]'
@@ -90,7 +94,7 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t border-[var(--border)] px-4 py-5">
+      <div className="border-t border-[var(--border)] px-3 py-4">
         {/* User profile */}
         <div className="flex items-center gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 shadow-sm">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-sm font-semibold text-white">

@@ -1,4 +1,5 @@
 import api from './axiosInstance';
+import { dedupedGet } from './requestManager';
 
 const apiClient = api;
 
@@ -8,7 +9,7 @@ const createAppointment = async (payload) => {
 };
 
 const getAppointments = async (params) => {
-  const response = await apiClient.get('/appointments', { params });
+  const response = await dedupedGet(apiClient, '/appointments', { params });
   return response.data;
 };
 
@@ -18,12 +19,12 @@ const updateStatus = async (id, status) => {
 };
 
 const getDoctorSchedule = async (params) => {
-  const response = await apiClient.get('/appointments/schedule', { params });
+  const response = await dedupedGet(apiClient, '/appointments/schedule', { params });
   return response.data;
 };
 
 const getTodayQueue = async () => {
-  const response = await apiClient.get('/appointments/queue/today');
+  const response = await dedupedGet(apiClient, '/appointments/queue/today');
   return response.data;
 };
 

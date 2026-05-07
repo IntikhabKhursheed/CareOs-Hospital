@@ -1,7 +1,8 @@
 import api from './axiosInstance';
+import { dedupedGet } from './requestManager';
 
 const getLabQueue = async () => {
-  const response = await api.get('/lab/queue');
+  const response = await dedupedGet(api, '/lab/queue');
   return response.data;
 };
 
@@ -21,7 +22,7 @@ const verifyResults = async (id, payload) => {
 };
 
 const getPatientLabReports = async (patientId) => {
-  const response = await api.get(`/lab/patient/${patientId}`);
+  const response = await dedupedGet(api, `/lab/patient/${patientId}`);
   return response.data;
 };
 

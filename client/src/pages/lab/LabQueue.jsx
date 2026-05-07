@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
 import labService from '../../services/labService';
+import { DataTable, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
 
 const LabQueue = () => {
   const [queue, setQueue] = useState([]);
@@ -36,39 +37,41 @@ const LabQueue = () => {
         </a>
       </div>
 
-      <section className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-1 shadow-sm">
-        <table className="min-w-full text-left text-sm text-[var(--text-secondary)]">
-          <thead className="border-b border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+      <section>
+        <TableContainer className="bg-[var(--bg-card)]">
+          <DataTable>
+          <TableHead>
             <tr>
-              <th className="px-5 py-4">Order ID</th>
-              <th className="px-5 py-4">Patient</th>
-              <th className="px-5 py-4">Priority</th>
-              <th className="px-5 py-4">Status</th>
-              <th className="px-5 py-4">Critical</th>
+              <TableHeader sortable sorted>Order ID</TableHeader>
+              <TableHeader>Patient</TableHeader>
+              <TableHeader sortable>Priority</TableHeader>
+              <TableHeader>Status</TableHeader>
+              <TableHeader align="center">Critical</TableHeader>
             </tr>
-          </thead>
+          </TableHead>
           <tbody>
             {loading
               ? Array.from({ length: 5 }).map((_, idx) => (
-                  <tr key={idx} className="border-b border-[var(--border)]">
-                    <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]" /></td>
-                    <td className="px-5 py-5"><div className="h-4 w-32 rounded bg-[var(--bg-secondary)]" /></td>
-                    <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]" /></td>
-                    <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]" /></td>
-                    <td className="px-5 py-5"><div className="h-4 w-12 rounded bg-[var(--bg-secondary)]" /></td>
-                  </tr>
+                  <TableRow key={idx}>
+                    <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]" /></TableCell>
+                    <TableCell><div className="h-4 w-32 rounded bg-[var(--bg-secondary)]" /></TableCell>
+                    <TableCell><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]" /></TableCell>
+                    <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]" /></TableCell>
+                    <TableCell align="center"><div className="mx-auto h-4 w-12 rounded bg-[var(--bg-secondary)]" /></TableCell>
+                  </TableRow>
                 ))
               : queue.map((item) => (
-                  <tr key={item._id} className="border-b border-[var(--border)] hover:bg-[var(--sidebar-active)] transition">
-                    <td className="px-5 py-5 font-semibold text-[var(--text-primary)]">{item._id.slice(-6)}</td>
-                    <td className="px-5 py-5 text-[var(--text-secondary)]">{item.patient?.name || 'Unknown'}</td>
-                    <td className="px-5 py-5 capitalize text-[var(--text-secondary)]">{item.priority}</td>
-                    <td className="px-5 py-5 capitalize text-[var(--text-secondary)]">{item.status}</td>
-                    <td className="px-5 py-5 text-[var(--text-secondary)]">{item.isCritical ? 'Yes' : 'No'}</td>
-                  </tr>
+                  <TableRow key={item._id}>
+                    <TableCell className="font-semibold text-[var(--text-primary)]">{item._id.slice(-6)}</TableCell>
+                    <TableCell>{item.patient?.name || 'Unknown'}</TableCell>
+                    <TableCell className="capitalize">{item.priority}</TableCell>
+                    <TableCell className="capitalize">{item.status}</TableCell>
+                    <TableCell align="center">{item.isCritical ? 'Yes' : 'No'}</TableCell>
+                  </TableRow>
                 ))}
           </tbody>
-        </table>
+          </DataTable>
+        </TableContainer>
       </section>
     </div>
   );

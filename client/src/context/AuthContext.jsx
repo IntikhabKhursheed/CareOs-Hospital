@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import authService from '../services/authService';
+import { connectSocket, disconnectSocket } from '../services/socket';
+import { navigateTo } from '../utils/navigation';
 
 export const AuthContext = createContext(null);
 
@@ -23,36 +24,39 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!user) {
-      setSocket((current) => {
-        current?.disconnect();
-        return null;
-      });
+      disconnectSocket();
+      setSocket(null);
       return;
     }
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
-    const newSocket = io(socketUrl, {
-      withCredentials: true
-    });
 
-    newSocket.on('connect', () => {
-      newSocket.emit('join_room', 'global');
-    });
-
-    newSocket.on('new_appointment', (data) => {
+    const sharedSocket = connectSocket();
+    const onConnect = () => {
+      sharedSocket.emit('join_room', 'global');
+    };
+    const onNewAppointment = (data) => {
       window.dispatchEvent(new CustomEvent('new_appointment', { detail: data }));
-    });
-
-    newSocket.on('patient_called', (data) => {
+    };
+    const onPatientCalled = (data) => {
       window.dispatchEvent(new CustomEvent('patient_called', { detail: data }));
-    });
-
-    newSocket.on('bed_status_update', (data) => {
+    };
+    const onBedStatusUpdate = (data) => {
       window.dispatchEvent(new CustomEvent('bed_status_update', { detail: data }));
-    });
+    };
 
-    setSocket(newSocket);
+    sharedSocket.off('connect', onConnect).on('connect', onConnect);
+    sharedSocket.off('new_appointment', onNewAppointment).on('new_appointment', onNewAppointment);
+    sharedSocket.off('patient_called', onPatientCalled).on('patient_called', onPatientCalled);
+    sharedSocket.off('bed_status_update', onBedStatusUpdate).on('bed_status_update', onBedStatusUpdate);
+    if (sharedSocket.connected) {
+      onConnect();
+    }
+
+    setSocket(sharedSocket);
     return () => {
-      newSocket.disconnect();
+      sharedSocket.off('connect', onConnect);
+      sharedSocket.off('new_appointment', onNewAppointment);
+      sharedSocket.off('patient_called', onPatientCalled);
+      sharedSocket.off('bed_status_update', onBedStatusUpdate);
     };
   }, [user]);
 
@@ -74,7 +78,7 @@ export const AuthProvider = ({ children }) => {
           pharmacist: '/dashboard',
           patient: '/dashboard'
         };
-        window.location.href = rolePath[response.data.user.role] || '/dashboard';
+        navigateTo(rolePath[response.data.user.role] || '/dashboard', { replace: true });
       } else {
         setError(response.message || 'Login failed');
       }
@@ -89,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     await authService.logout();
     setUser(null);
     localStorage.removeItem('careos_token');
-    window.location.href = '/login';
+    navigateTo('/login', { replace: true });
   };
 
   return (

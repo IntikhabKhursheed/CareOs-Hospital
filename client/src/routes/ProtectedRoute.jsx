@@ -1,12 +1,13 @@
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { navigateTo } from '../utils/navigation';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/login';
+      navigateTo('/login', { replace: true });
     }
   }, [loading, user]);
 

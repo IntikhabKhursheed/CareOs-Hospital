@@ -19,6 +19,7 @@ import AppointmentForm from './pages/appointments/AppointmentForm';
 import QueueDisplay from './pages/appointments/QueueDisplay';
 import NotFound from './pages/NotFound';
 import Sidebar from './components/layout/Sidebar';
+import { navigateTo, subscribeNavigation } from './utils/navigation';
 
 const getNavItems = (role) => {
   const adminItems = [
@@ -55,7 +56,7 @@ const getNavItems = (role) => {
 
 function App() {
   const { user, logout } = useContext(AuthContext);
-  const path = window.location.pathname;
+  const [path, setPath] = useState(window.location.pathname);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('careos_theme') === 'dark' ? 'dark' : 'light';
   });
@@ -65,6 +66,25 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('careos_theme', theme);
   }, [theme]);
+
+  useEffect(() => subscribeNavigation(setPath), []);
+
+  useEffect(() => {
+    const handleDocumentNavigation = (event) => {
+      const anchor = event.target.closest('a[href]');
+      if (!anchor) return;
+      if (anchor.target && anchor.target !== '_self') return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const href = anchor.getAttribute('href');
+      if (!href || !href.startsWith('/')) return;
+      event.preventDefault();
+      navigateTo(href);
+      setSidebarOpen(false);
+    };
+
+    document.addEventListener('click', handleDocumentNavigation);
+    return () => document.removeEventListener('click', handleDocumentNavigation);
+  }, []);
 
   const toggleTheme = () => {
     setTheme((current) => (current === 'light' ? 'dark' : 'light'));
@@ -97,7 +117,7 @@ function App() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-200">
+      <div className="app-shell min-h-screen text-[var(--text-primary)] transition-colors duration-200">
         <Sidebar
           navItems={navItems}
           user={user}
@@ -117,19 +137,21 @@ function App() {
           />
         )}
 
-        <main className="min-h-screen px-4 py-6 transition-all lg:ml-72 lg:px-6 lg:py-8">
+        <main className="min-h-screen px-4 py-5 transition-all lg:ml-72 lg:px-8 lg:py-6">
           {/* Mobile header bar */}
           <div className="mb-4 flex items-center gap-3 lg:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] shadow-sm"
             >
               <Menu size={20} />
             </button>
             <span className="text-lg font-semibold text-[var(--text-primary)]">CareOS</span>
           </div>
 
-          {routeComponent}
+          <div className="mx-auto max-w-[1500px]">
+            {routeComponent}
+          </div>
         </main>
       </div>
     </ProtectedRoute>

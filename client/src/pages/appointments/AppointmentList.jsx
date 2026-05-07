@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import appointmentService from '../../services/appointmentService';
+import { DataTable, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
 
 const statusStyles = {
   scheduled: 'bg-sky-500/15 text-sky-600',
@@ -19,16 +20,21 @@ const AppointmentList = () => {
   const [limit] = useState(10);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit });
   const [loading, setLoading] = useState(true);
+  const latestRequestRef = useRef(0);
 
   const loadAppointments = async () => {
+    const requestId = latestRequestRef.current + 1;
+    latestRequestRef.current = requestId;
     setLoading(true);
     try {
       const response = await appointmentService.getAppointments({ search, status, type, page, limit });
+      if (latestRequestRef.current !== requestId) return;
       setAppointments(response.data.appointments);
       setPagination(response.data.pagination);
     } catch (error) {
       console.error(error);
     } finally {
+      if (latestRequestRef.current !== requestId) return;
       setLoading(false);
     }
   };
@@ -88,43 +94,45 @@ const AppointmentList = () => {
           </section>
         </div>
 
-        <div className="mt-6 overflow-x-auto rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-1 shadow-sm">
-          <table className="min-w-full text-left text-sm text-[var(--text-secondary)]">
-            <thead className="border-b border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+        <div className="mt-6">
+          <TableContainer>
+            <DataTable>
+            <TableHead>
               <tr>
-                <th className="px-5 py-4">Patient</th>
-                <th className="px-5 py-4">Doctor</th>
-                <th className="px-5 py-4">Date</th>
-                <th className="px-5 py-4">Status</th>
-                <th className="px-5 py-4">Type</th>
+                <TableHeader sortable sorted>Patient</TableHeader>
+                <TableHeader sortable>Doctor</TableHeader>
+                <TableHeader sortable>Date</TableHeader>
+                <TableHeader>Status</TableHeader>
+                <TableHeader>Type</TableHeader>
               </tr>
-            </thead>
+            </TableHead>
             <tbody>
               {loading
                 ? Array.from({ length: 6 }).map((_, idx) => (
-                    <tr key={idx} className="border-b border-[var(--border)]">
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></td>
-                      <td className="px-5 py-5"><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></td>
-                    </tr>
+                    <TableRow key={idx}>
+                      <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-28 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-24 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                      <TableCell><div className="h-4 w-20 rounded bg-[var(--bg-secondary)]/60" /></TableCell>
+                    </TableRow>
                   ))
                 : appointments.map((item) => (
-                    <tr key={item._id} className="border-b border-[var(--border)] hover:bg-[var(--sidebar-active)] transition">
-                      <td className="px-5 py-5 font-semibold text-[var(--text-primary)]">{item.patient?.name || 'Unknown'}</td>
-                      <td className="px-5 py-5 text-[var(--text-secondary)]">{item.doctor?.name || 'Unknown'}</td>
-                      <td className="px-5 py-5 text-[var(--text-secondary)]">{new Date(item.date).toLocaleDateString()}</td>
-                      <td className="px-5 py-5">
+                    <TableRow key={item._id}>
+                      <TableCell className="font-semibold text-[var(--text-primary)]">{item.patient?.name || 'Unknown'}</TableCell>
+                      <TableCell>{item.doctor?.name || 'Unknown'}</TableCell>
+                      <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                      <TableCell>
                         <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[item.status] || 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}>
                           {item.status.replace('_', ' ')}
                         </span>
-                      </td>
-                      <td className="px-5 py-5 capitalize text-[var(--text-secondary)]">{item.type}</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="capitalize">{item.type}</TableCell>
+                    </TableRow>
                   ))}
             </tbody>
-          </table>
+          </DataTable>
+          </TableContainer>
         </div>
 
         <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">

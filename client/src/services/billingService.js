@@ -1,4 +1,5 @@
 import api from './axiosInstance';
+import { dedupedGet } from './requestManager';
 
 const generateBill = async (payload, download = false) => {
   const path = `/billing${download ? '?download=true' : ''}`;
@@ -14,7 +15,7 @@ const addPayment = async (id, payload) => {
 };
 
 const getBills = async (params) => {
-  const response = await api.get('/billing', { params });
+  const response = await dedupedGet(api, '/billing', { params });
   return response.data;
 };
 

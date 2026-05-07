@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, ChevronLeft, Sparkles, Stethoscope, Pill, Activity } from 'lucide-react';
 import patientService from '../../services/patientService';
 import aiService from '../../services/aiService';
+import { navigateTo } from '../../utils/navigation';
 
 const ConsultationScreen = () => {
   const patientId = window.location.pathname.split('/').pop();
@@ -87,7 +88,7 @@ const ConsultationScreen = () => {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] p-4 sm:p-8">
-      <button onClick={() => window.location.href = '/patients'} className="mb-4 inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]">
+      <button onClick={() => navigateTo('/patients')} className="mb-4 inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]">
         <ChevronLeft size={16} /> Back to patients
       </button>
 
@@ -255,7 +256,7 @@ const ConsultationScreen = () => {
 
           {/* Save button */}
           <div className="mt-6">
-            <button onClick={() => window.location.href = '/patients'} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800">
+            <button onClick={() => navigateTo('/patients')} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800">
               Save Consultation
             </button>
           </div>

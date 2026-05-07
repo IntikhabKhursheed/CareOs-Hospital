@@ -51,7 +51,7 @@ const Login = () => {
   };
 
   const brandSide = (
-    <div className="hidden lg:flex lg:w-[40%] flex-col justify-center p-12 text-white" style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}>
+    <div className="hidden lg:flex lg:w-[42%] flex-col justify-center p-12 text-white" style={{ background: 'linear-gradient(140deg, #4338ca 0%, #4f46e5 52%, #2563eb 100%)' }}>
       <h1 className="text-5xl font-bold mb-4">CareOS</h1>
       <p className="text-xl opacity-90 mb-10">AI-Powered Hospital Management</p>
       <ul className="space-y-5 text-base opacity-90">
@@ -67,29 +67,29 @@ const Login = () => {
       <div className="min-h-screen flex">
         {brandSide}
         <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
-          <div className="w-full max-w-md">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[var(--shadow)]">
             <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Create Account</h2>
             <p className="text-[var(--text-secondary)] mb-8">Register for CareOS access</p>
             <form className="space-y-4" onSubmit={handleRegisterSubmit}>
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Full Name</label>
-                <input name="name" type="text" value={registerData.name} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="John Doe" />
+                <input name="name" type="text" value={registerData.name} onChange={handleRegisterChange} required className="input-field w-full" placeholder="John Doe" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
-                <input name="email" type="email" value={registerData.email} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="you@example.com" />
+                <input name="email" type="email" value={registerData.email} onChange={handleRegisterChange} required className="input-field w-full" placeholder="you@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Password</label>
-                <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="Enter password" />
+                <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange} required className="input-field w-full" placeholder="Enter password" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Phone</label>
-                <input name="phone" type="tel" value={registerData.phone} onChange={handleRegisterChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="+1234567890" />
+                <input name="phone" type="tel" value={registerData.phone} onChange={handleRegisterChange} required className="input-field w-full" placeholder="+1234567890" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Role</label>
-                <select name="role" value={registerData.role} onChange={handleRegisterChange} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none">
+                <select name="role" value={registerData.role} onChange={handleRegisterChange} className="input-field w-full">
                   <option value="patient">Patient</option>
                   <option value="doctor">Doctor</option>
                   <option value="nurse">Nurse</option>
@@ -97,7 +97,7 @@ const Login = () => {
                   <option value="lab_technician">Lab Technician</option>
                 </select>
               </div>
-              <button type="submit" disabled={registerLoading} className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700 transition disabled:opacity-50">
+              <button type="submit" disabled={registerLoading} className="btn-primary w-full disabled:opacity-50">
                 {registerLoading ? 'Creating Account...' : 'Create Account'}
               </button>
             </form>
@@ -114,20 +114,20 @@ const Login = () => {
     <div className="min-h-screen flex">
       {brandSide}
       <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[var(--shadow)]">
           <h2 className="text-[28px] font-bold text-[var(--text-primary)] mb-2">Welcome back</h2>
           <p className="text-[var(--text-secondary)] mb-8">Sign in to your account</p>
 
           <form className="space-y-5" onSubmit={handleLoginSubmit}>
             <div>
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
-              <input name="email" type="email" value={formData.email} onChange={handleLoginChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none" placeholder="admin@careos.com" />
+              <input name="email" type="email" value={formData.email} onChange={handleLoginChange} required className="input-field w-full" placeholder="admin@careos.com" />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Password</label>
               <div className="relative">
-                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleLoginChange} required className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-primary)] focus:border-indigo-500 focus:outline-none pr-10" placeholder="Enter your password" />
+                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleLoginChange} required className="input-field w-full pr-10" placeholder="Enter your password" />
                 <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -135,12 +135,12 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+              <div className="rounded-lg bg-red-500/10 border border-red-300 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700 transition disabled:opacity-50">
+            <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
@@ -154,7 +154,7 @@ const Login = () => {
             </div>
           </div>
 
-          <button onClick={() => setShowRegister(true)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition">
+          <button onClick={() => setShowRegister(true)} className="btn-secondary w-full">
             Create Account
           </button>
 
