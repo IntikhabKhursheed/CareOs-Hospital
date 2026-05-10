@@ -16,16 +16,16 @@ const steps = [
 
 const InputField = ({ label, icon: Icon, ...props }) => (
   <div className="group">
-    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-[0.08em] mb-2">{label}</label>
+    <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.08em] mb-2">{label}</label>
     <div className="relative">
       {Icon && (
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-indigo-500 transition-colors pointer-events-none">
           <Icon size={15} />
         </div>
       )}
       <input
         {...props}
-        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:border-indigo-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-slate-300 transition-all duration-200`}
+        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-[var(--bg-secondary)] border-2 border-[var(--border)] rounded-xl text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal focus:outline-none focus:border-indigo-500 focus:bg-[var(--bg-card)] focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-slate-300 transition-all duration-200`}
       />
     </div>
   </div>
@@ -33,20 +33,20 @@ const InputField = ({ label, icon: Icon, ...props }) => (
 
 const SelectField = ({ label, icon: Icon, children, ...props }) => (
   <div className="group">
-    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-[0.08em] mb-2">{label}</label>
+    <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.08em] mb-2">{label}</label>
     <div className="relative">
       {Icon && (
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-indigo-500 transition-colors pointer-events-none">
           <Icon size={15} />
         </div>
       )}
       <select
         {...props}
-        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-10 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 appearance-none cursor-pointer focus:outline-none focus:border-indigo-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-slate-300 transition-all duration-200`}
+        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-10 py-3 bg-[var(--bg-secondary)] border-2 border-[var(--border)] rounded-xl text-sm font-medium text-[var(--text-primary)] appearance-none cursor-pointer focus:outline-none focus:border-indigo-500 focus:bg-[var(--bg-card)] focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-slate-300 transition-all duration-200`}
       >
         {children}
       </select>
-      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)]">
         <ChevronRight size={14} className="rotate-90" />
       </div>
     </div>
@@ -55,16 +55,16 @@ const SelectField = ({ label, icon: Icon, children, ...props }) => (
 
 const TextareaField = ({ label, icon: Icon, ...props }) => (
   <div className="group">
-    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-[0.08em] mb-2">{label}</label>
+    <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.08em] mb-2">{label}</label>
     <div className="relative">
       {Icon && (
-        <div className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none">
+        <div className="absolute left-3.5 top-3.5 text-[var(--text-secondary)] group-focus-within:text-indigo-500 transition-colors pointer-events-none">
           <Icon size={15} />
         </div>
       )}
       <textarea
         {...props}
-        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:border-indigo-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-slate-300 transition-all duration-200 resize-none`}
+        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-[var(--bg-secondary)] border-2 border-[var(--border)] rounded-xl text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal focus:outline-none focus:border-indigo-500 focus:bg-[var(--bg-card)] focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-slate-300 transition-all duration-200 resize-none`}
       />
     </div>
   </div>
@@ -114,15 +114,15 @@ export default function PatientForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30 flex items-center justify-center p-8">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-12 max-w-md w-full text-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center p-8">
+        <div className="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] shadow-xl p-12 max-w-md w-full text-center">
           <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 size={40} className="text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Patient Registered</h2>
-          <p className="text-slate-500 mb-8">The patient record has been created successfully.</p>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Patient Registered</h2>
+          <p className="text-[var(--text-secondary)] mb-8">The patient record has been created successfully.</p>
           <div className="flex gap-3">
-            <button onClick={reset} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors">
+            <button onClick={reset} className="flex-1 py-3 bg-[var(--bg-secondary)] hover:bg-[var(--sidebar-active)] text-[var(--text-primary)] font-semibold rounded-xl transition-colors">
               Add Another
             </button>
             <button onClick={() => navigateTo('/patients')} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors">
@@ -135,23 +135,23 @@ export default function PatientForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30 dark:from-slate-900 dark:to-slate-900 p-6 lg:p-10">
+    <div className="min-h-screen bg-[var(--bg-primary)] p-6 lg:p-10">
       <div className="max-w-2xl mx-auto">
 
         <div className="mb-8">
-          <button onClick={() => navigateTo('/patients')} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-4 transition-colors group">
+          <button onClick={() => navigateTo('/patients')} className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-4 transition-colors group">
             <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
             Back to patients
           </button>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">New Patient</p>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Register Patient</h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1.5">Complete all three steps to create the record</p>
+              <p className="text-xs font-bold text-[var(--accent)] uppercase tracking-widest mb-1">New Patient</p>
+              <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">Register Patient</h1>
+              <p className="text-[var(--text-secondary)] mt-1.5">Complete all three steps to create the record</p>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-2">
+            <div className="hidden sm:flex items-center gap-1.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-full px-4 py-2">
               <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-              <span className="text-xs font-semibold text-indigo-600">Step {step} of 3</span>
+              <span className="text-xs font-semibold text-[var(--accent)]">Step {step} of 3</span>
             </div>
           </div>
         </div>
@@ -164,29 +164,29 @@ export default function PatientForm() {
             return (
               <div key={s.id} className="flex items-center flex-1 last:flex-none">
                 <div className="flex items-center gap-3">
-                  <div className={`relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 ${isDone ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : isActive ? 'bg-indigo-600 shadow-lg shadow-indigo-200' : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700'}`}>
-                    {isDone ? <Check size={18} className="text-white" strokeWidth={2.5} /> : <Icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />}
+                  <div className={`relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 ${isDone ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : isActive ? 'bg-indigo-600 shadow-lg shadow-indigo-200' : 'bg-[var(--bg-card)] border-2 border-[var(--border)]'}`}>
+                    {isDone ? <Check size={18} className="text-white" strokeWidth={2.5} /> : <Icon size={18} className={isActive ? 'text-white' : 'text-[var(--text-secondary)]'} />}
                     {isActive && <div className="absolute inset-0 rounded-2xl bg-indigo-400 animate-ping opacity-20" />}
                   </div>
                   <div className="hidden sm:block">
-                    <p className={`text-sm font-bold leading-tight ${isActive ? 'text-slate-900 dark:text-white' : isDone ? 'text-emerald-600' : 'text-slate-400'}`}>{s.title}</p>
-                    <p className="text-[11px] text-slate-400">{s.subtitle}</p>
+                    <p className={`text-sm font-bold leading-tight ${isActive ? 'text-[var(--text-primary)]' : isDone ? 'text-emerald-600' : 'text-[var(--text-secondary)]'}`}>{s.title}</p>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{s.subtitle}</p>
                   </div>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-3 rounded-full transition-all duration-500 ${step > s.id ? 'bg-emerald-400' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                  <div className={`flex-1 h-0.5 mx-3 rounded-full transition-all duration-500 ${step > s.id ? 'bg-emerald-400' : 'bg-[var(--border)]'}`} />
                 )}
               </div>
             );
           })}
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div className={`px-8 py-5 border-b border-slate-100 dark:border-slate-700 ${step === 1 ? 'bg-gradient-to-r from-indigo-50 to-purple-50/50' : step === 2 ? 'bg-gradient-to-r from-rose-50 to-orange-50/50' : 'bg-gradient-to-r from-emerald-50 to-teal-50/50'}`}>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+        <div className="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] shadow-sm overflow-hidden">
+          <div className={`px-8 py-5 border-b border-[var(--border)] ${step === 1 ? 'bg-[var(--bg-secondary)]' : step === 2 ? 'bg-[var(--bg-secondary)]' : 'bg-[var(--bg-secondary)]'}`}>
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">
               {step === 1 ? '👤 Personal Information' : step === 2 ? '🏥 Medical History' : '🆘 Emergency Contact'}
             </h2>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">
               {step === 1 ? "Patient's basic identification and contact details" : step === 2 ? 'Allergies, conditions, and medical background' : 'Who to contact in case of emergency'}
             </p>
           </div>
@@ -256,16 +256,16 @@ export default function PatientForm() {
             )}
           </div>
 
-          <div className="px-8 py-5 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div className="px-8 py-5 bg-[var(--bg-secondary)] border-t border-[var(--border)] flex items-center justify-between">
             <div className="flex items-center gap-3">
               {step > 1 && (
-                <button onClick={() => setStep(s => s - 1)} className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 text-slate-700 dark:text-slate-300 font-semibold text-sm rounded-xl transition-all">
+                <button onClick={() => setStep(s => s - 1)} className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border-2 border-[var(--border)] hover:border-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm rounded-xl transition-all">
                   <ArrowLeft size={15} /> Back
                 </button>
               )}
               <div className="flex gap-1.5">
                 {steps.map(s => (
-                  <div key={s.id} className={`h-1.5 rounded-full transition-all duration-300 ${step === s.id ? 'w-6 bg-indigo-600' : step > s.id ? 'w-3 bg-emerald-400' : 'w-3 bg-slate-200 dark:bg-slate-600'}`} />
+                  <div key={s.id} className={`h-1.5 rounded-full transition-all duration-300 ${step === s.id ? 'w-6 bg-indigo-600' : step > s.id ? 'w-3 bg-emerald-400' : 'w-3 bg-[var(--border)]'}`} />
                 ))}
               </div>
             </div>
