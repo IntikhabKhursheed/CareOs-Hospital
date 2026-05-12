@@ -39,10 +39,10 @@ router.patch('/:id/collect-sample',
   labTestRequestController.markSampleCollected
 );
 
-// Enter test results (Lab Technician)
+// Enter test results (Lab Technician, Super Admin)
 router.patch('/:id/results',
   authMiddleware,
-  authorizeRoles('lab_technician'),
+  authorizeRoles('lab_technician', 'super_admin'),
   labTestRequestController.enterResults
 );
 

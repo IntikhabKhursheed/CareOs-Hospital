@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
-import labService from '../../services/labService';
+import labTestRequestService from '../../services/labTestRequestService';
+import testService from '../../services/testService';
 
 const ResultEntry = () => {
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -15,19 +16,25 @@ const ResultEntry = () => {
     const loadOrder = async () => {
       setLoading(true);
       try {
-        const response = await labService.getLabQueue();
-        const order = response.data.find((item) => item._id === orderId);
-        if (order) {
-          setTestRequest(order);
+        const order = await labTestRequestService.getTestRequestById(orderId);
+        if (order.data) {
+          setTestRequest(order.data);
           // Initialize parameter values from existing results
-          if (order.results?.length) {
+          if (order.data.results?.length) {
             const values = {};
-            order.results.forEach(result => {
+            order.data.results.forEach(result => {
               values[result.parameterName || result.test] = result.value;
             });
             setParameterValues(values);
+          } else if (order.data.test?.parameters?.length) {
+            // Initialize with empty values for new entries based on test catalog parameters
+            const values = {};
+            order.data.test.parameters.forEach(param => {
+              values[param.name] = '';
+            });
+            setParameterValues(values);
           }
-          setVerified(order.isVerified);
+          setVerified(order.data.isVerified);
         }
       } catch (error) {
         console.error(error);
@@ -52,16 +59,29 @@ const ResultEntry = () => {
     }
     setLoading(true);
     try {
-      const results = testRequest.test.parameters.map(param => ({
-        parameterName: param.name,
-        value: parameterValues[param.name] || '',
-        unit: param.unit,
-        normalRange: testRequest.patient?.gender === 'male' ? param.normalRangeMale : 
-                    testRequest.patient?.gender === 'female' ? param.normalRangeFemale : 
-                    param.normalRangeChild
-      }));
+      let results;
       
-      await labService.updateResults(orderId, { results });
+      if (testRequest.test?.parameters?.length > 0) {
+        // Test has parameters
+        results = testRequest.test.parameters.map(param => ({
+          parameterName: param.name,
+          value: parameterValues[param.name] || '',
+          unit: param.unit,
+          normalRange: testRequest.patient?.gender === 'male' ? param.normalRangeMale : 
+                      testRequest.patient?.gender === 'female' ? param.normalRangeFemale : 
+                      param.normalRangeChild
+        }));
+      } else {
+        // Test has no parameters, use description
+        results = [{
+          parameterName: 'description',
+          value: parameterValues.description || '',
+          unit: '',
+          normalRange: ''
+        }];
+      }
+      
+      await labTestRequestService.enterResults(orderId, results);
       toast.success('Lab results saved');
     } catch (error) {
       console.error(error);
@@ -72,18 +92,8 @@ const ResultEntry = () => {
   };
 
   const handleVerify = async () => {
-    if (!orderId) return;
-    setLoading(true);
-    try {
-      await labService.verifyResults(orderId, { verified: true });
-      setVerified(true);
-      toast.success('Lab results verified');
-    } catch (error) {
-      console.error(error);
-      toast.error('Unable to verify results');
-    } finally {
-      setLoading(false);
-    }
+    // Verification functionality not implemented yet
+    toast('Verification feature coming soon');
   };
 
   return (
@@ -162,8 +172,17 @@ const ResultEntry = () => {
               ))}
             </div>
           ) : (
-            <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-secondary)]">
-              No parameters defined for this test.
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                Test Result Description
+              </label>
+              <textarea
+                value={parameterValues.description || ''}
+                onChange={(e) => handleParameterChange('description', e.target.value)}
+                rows={6}
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-primary"
+                placeholder="Enter test result description"
+              />
             </div>
           )}
         </div>
@@ -172,7 +191,7 @@ const ResultEntry = () => {
           <p className="text-sm text-[var(--text-secondary)]">Save result data once it reflects the completed lab findings.</p>
           <button
             onClick={handleSave}
-            disabled={!testRequest?.test?.parameters?.length || loading}
+            disabled={loading}
             className="btn-primary w-full sm:w-auto"
           >
             Save results

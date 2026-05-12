@@ -16,7 +16,7 @@ const LabQueue = () => {
       await labTestRequestService.markSampleCollected(requestId);
       toast.success('Sample marked as collected');
       // Refresh the queue
-      const response = await labTestRequestService.getLabQueue({ status: 'pending' });
+      const response = await labTestRequestService.getLabQueue({ status: ['pending', 'in_progress'] });
       setQueue(response.data?.requests || []);
     } catch (error) {
       console.error(error);
@@ -28,7 +28,7 @@ const LabQueue = () => {
     const loadQueue = async () => {
       setLoading(true);
       try {
-        const response = await labTestRequestService.getLabQueue({ status: 'pending' });
+        const response = await labTestRequestService.getLabQueue({ status: ['pending', 'in_progress'] });
         setQueue(response.data?.requests || []);
       } catch (error) {
         console.error(error);
@@ -139,7 +139,7 @@ const LabQueue = () => {
                         {request.sampleCollected && !request.results && (
                           <Button
                             size="sm"
-                            onClick={() => navigateTo(`/lab/results/${request._id}`)}
+                            onClick={() => navigateTo(`/lab/results?id=${request._id}`)}
                             className="text-xs"
                           >
                             Enter Results

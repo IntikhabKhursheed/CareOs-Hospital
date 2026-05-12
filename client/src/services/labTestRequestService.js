@@ -24,7 +24,7 @@ const markSampleCollected = async (id) => {
 };
 
 const enterResults = async (id, results) => {
-  const response = await apiClient.patch(`/lab-requests/${id}/enter-results`, { results });
+  const response = await apiClient.patch(`/lab-requests/${id}/results`, { results });
   return response.data;
 };
 
