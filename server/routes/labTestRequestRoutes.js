@@ -4,23 +4,24 @@ const labTestRequestController = require('../controllers/labTestRequestControlle
 const authMiddleware = require('../middleware/authMiddleware');
 const authorizeRoles = require('../middleware/roleMiddleware');
 
-// Create test request (Doctor, Lab Technician)
+// Create test request (Doctor, Lab Technician, Admin, Super Admin)
 router.post('/', 
   authMiddleware,
-  authorizeRoles('doctor', 'lab_technician'),
+  authorizeRoles('doctor', 'lab_technician', 'admin', 'super_admin'),
   labTestRequestController.createTestRequest
 );
 
-// Get lab queue (Lab Technician, Doctor)
+// Get lab queue (Lab Technician, Doctor, Admin, Super Admin)
 router.get('/queue',
   authMiddleware,
-  authorizeRoles('lab_technician', 'doctor'),
+  authorizeRoles('lab_technician', 'doctor', 'admin', 'super_admin'),
   labTestRequestController.getLabQueue
 );
 
 // Get test request by ID
 router.get('/:id',
   authMiddleware,
+  authorizeRoles('lab_technician', 'doctor', 'admin', 'super_admin', 'patient'),
   labTestRequestController.getTestRequestById
 );
 
@@ -31,10 +32,10 @@ router.put('/:id',
   labTestRequestController.updateTestRequest
 );
 
-// Mark sample as collected (Lab Technician)
+// Mark sample as collected (Lab Technician, Super Admin)
 router.patch('/:id/collect-sample',
   authMiddleware,
-  authorizeRoles('lab_technician'),
+  authorizeRoles('lab_technician', 'super_admin'),
   labTestRequestController.markSampleCollected
 );
 

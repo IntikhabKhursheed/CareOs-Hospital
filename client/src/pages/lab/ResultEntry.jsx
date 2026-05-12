@@ -5,7 +5,8 @@ import labService from '../../services/labService';
 const ResultEntry = () => {
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
   const orderId = query.get('id');
-  const [results, setResults] = useState('');
+  const [testRequest, setTestRequest] = useState(null);
+  const [parameterValues, setParameterValues] = useState({});
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -16,8 +17,16 @@ const ResultEntry = () => {
       try {
         const response = await labService.getLabQueue();
         const order = response.data.find((item) => item._id === orderId);
-        if (order && order.results?.length) {
-          setResults(order.results.map((r) => `${r.test}: ${r.value} ${r.unit || ''}`).join('\n'));
+        if (order) {
+          setTestRequest(order);
+          // Initialize parameter values from existing results
+          if (order.results?.length) {
+            const values = {};
+            order.results.forEach(result => {
+              values[result.parameterName || result.test] = result.value;
+            });
+            setParameterValues(values);
+          }
           setVerified(order.isVerified);
         }
       } catch (error) {
@@ -29,6 +38,13 @@ const ResultEntry = () => {
     loadOrder();
   }, [orderId]);
 
+  const handleParameterChange = (parameterName, value) => {
+    setParameterValues(prev => ({
+      ...prev,
+      [parameterName]: value
+    }));
+  };
+
   const handleSave = async () => {
     if (!orderId) {
       toast.error('Missing lab order id in URL');
@@ -36,7 +52,16 @@ const ResultEntry = () => {
     }
     setLoading(true);
     try {
-      await labService.updateResults(orderId, { results: results.split('\n').map((line) => ({ test: line.split(':')[0]?.trim(), value: line.split(':')[1]?.trim() })) });
+      const results = testRequest.test.parameters.map(param => ({
+        parameterName: param.name,
+        value: parameterValues[param.name] || '',
+        unit: param.unit,
+        normalRange: testRequest.patient?.gender === 'male' ? param.normalRangeMale : 
+                    testRequest.patient?.gender === 'female' ? param.normalRangeFemale : 
+                    param.normalRangeChild
+      }));
+      
+      await labService.updateResults(orderId, { results });
       toast.success('Lab results saved');
     } catch (error) {
       console.error(error);
@@ -97,20 +122,57 @@ const ResultEntry = () => {
           </div>
         </div>
 
-        <label className="mt-8 block text-sm uppercase tracking-[0.2em] text-[var(--text-secondary)]">Result payload</label>
-        <textarea
-          value={results}
-          onChange={(e) => setResults(e.target.value)}
-          rows={12}
-          className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-primary)] outline-none transition focus:border-primary"
-          placeholder="Use format: Test name: value"
-        />
+        <div className="mt-8">
+          <label className="block text-sm uppercase tracking-[0.2em] text-[var(--text-secondary)]">Test Parameters</label>
+          {testRequest?.test?.parameters?.length > 0 ? (
+            <div className="mt-4 space-y-4">
+              {testRequest.test.parameters.map((param, index) => (
+                <div key={index} className="grid gap-4 sm:grid-cols-[1fr_200px_200px]">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                      {param.name}
+                    </label>
+                    <input
+                      type="text"
+                      value={parameterValues[param.name] || ''}
+                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-primary"
+                      placeholder={`Enter ${param.name} value`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                      Unit
+                    </label>
+                    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+                      {param.unit}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                      Normal Range
+                    </label>
+                    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+                      {testRequest.patient?.gender === 'male' ? param.normalRangeMale : 
+                       testRequest.patient?.gender === 'female' ? param.normalRangeFemale : 
+                       param.normalRangeChild || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-secondary)]">
+              No parameters defined for this test.
+            </div>
+          )}
+        </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <p className="text-sm text-[var(--text-secondary)]">Save result data once it reflects the completed lab findings.</p>
           <button
             onClick={handleSave}
-            disabled={!results.trim() || loading}
+            disabled={!testRequest?.test?.parameters?.length || loading}
             className="btn-primary w-full sm:w-auto"
           >
             Save results
