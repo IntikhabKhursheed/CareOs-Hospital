@@ -78,8 +78,16 @@ exports.getLabOrders = async (req, res, next) => {
     } = req.query;
 
     const filters = {};
-    if (status) filters.overallStatus = status;
-    if (priority) filters['tests.priority'] = priority;
+    if (status) {
+      if (Array.isArray(status)) {
+        filters.overallStatus = { $in: status };
+      } else {
+        filters.overallStatus = status;
+      }
+    }
+    if (priority) {
+      filters.tests = { $elemMatch: { priority } };
+    }
 
     const sort = {};
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;

@@ -339,7 +339,7 @@ export default function TestCatalogForm() {
                   </label>
                   <div className="relative">
                     <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-indigo-500 transition-colors pointer-events-none">
-                      <span className="text-sm font-medium">₨</span>
+                      <span className="text-sm font-medium">₨ </span>
                     </div>
                     <input
                       name="price"

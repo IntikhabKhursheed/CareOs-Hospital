@@ -31,10 +31,10 @@ const LabQueue = () => {
       if (activeTab === 'STAT') filters.priority = 'stat';
       if (activeTab === 'Urgent') filters.priority = 'urgent';
       if (activeTab === 'Routine') filters.priority = 'routine';
-      if (activeTab === 'Completed') filters.overallStatus = 'completed';
+      if (activeTab === 'Completed') filters.status = 'completed';
       if (activeTab === 'All') {
         // Show pending and partial for All tab
-        filters.overallStatus = ['ordered', 'partial'];
+        filters.status = ['ordered', 'partial'];
       }
 
       const response = await labOrderService.getLabOrders({
@@ -44,7 +44,7 @@ const LabQueue = () => {
         sortBy: 'createdAt',
         sortOrder: 'desc'
       });
-      setOrders(response.data?.orders || []);
+      setOrders(response.data?.data?.orders || response.data?.orders || []);
     } catch (error) {
       console.error(error);
       toast.error('Unable to load lab queue');
@@ -57,7 +57,7 @@ const LabQueue = () => {
     try {
       // Get all orders for stats calculation
       const allOrdersResponse = await labOrderService.getLabOrders({ limit: 1000 });
-      const allOrders = allOrdersResponse.data?.orders || [];
+      const allOrders = allOrdersResponse.data?.data?.orders || allOrdersResponse.data?.orders || [];
 
       const today = new Date().toDateString();
       const pending = allOrders.filter(order => 

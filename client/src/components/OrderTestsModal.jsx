@@ -24,9 +24,12 @@ const OrderTestsModal = ({ isOpen, onClose, patientId }) => {
     try {
       const response = await testService.getTests();
       console.log('Tests response:', response);
-      // Handle different response structures
-      const testsData = response.data?.tests || response.data?.allTests || response.data || [];
-      setTests(Array.isArray(testsData) ? testsData : []);
+      // Handle the actual response structure from API
+      const testsData = response.data?.data?.allTests || response.data?.data?.tests || response.data?.allTests || response.data?.tests || [];
+      // If testsData is an object (grouped tests), flatten it
+      const flatTests = Array.isArray(testsData) ? testsData : 
+        Object.values(testsData).flat() || [];
+      setTests(flatTests);
     } catch (error) {
       console.error('Failed to load tests:', error);
       toast.error('Failed to load tests');
@@ -198,7 +201,7 @@ const OrderTestsModal = ({ isOpen, onClose, patientId }) => {
                                 {test.turnaroundHours}h
                               </span>
                               <span className="flex items-center gap-1">
-                                <span className="text-sm font-medium">₨</span>
+                                <span className="text-sm font-medium">₨ </span>
                                 ${test.price}
                               </span>
                               <span className="bg-[var(--bg-secondary)] px-2 py-1 rounded text-xs">
