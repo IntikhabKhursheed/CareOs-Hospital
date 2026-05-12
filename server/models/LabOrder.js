@@ -60,8 +60,7 @@ const testResultSchema = new mongoose.Schema({
 const labOrderSchema = new mongoose.Schema({
   orderNumber: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   patient: {
     type: mongoose.Schema.Types.ObjectId,
