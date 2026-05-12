@@ -1,5 +1,6 @@
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
+const Doctor = require('../models/Doctor');
 const apiResponse = require('../utils/apiResponse');
 
 exports.createAppointment = async (req, res, next) => {
@@ -44,7 +45,13 @@ exports.getAppointments = async (req, res, next) => {
     const total = await Appointment.countDocuments(filters);
     const appointments = await Appointment.find(filters)
       .populate('patient', 'MRH name phone')
-      .populate('doctor', 'name specialization')
+      .populate({
+        path: 'doctor',
+        populate: {
+          path: 'user',
+          select: 'name email phone'
+        }
+      })
       .sort({ date: -1, createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));
@@ -78,7 +85,16 @@ exports.getDoctorSchedule = async (req, res, next) => {
       const end = new Date(day.setHours(23, 59, 59, 999));
       filters.date = { $gte: start, $lte: end };
     }
-    const schedule = await Appointment.find(filters).populate('patient', 'MRH name').sort({ timeSlot: 1 });
+    const schedule = await Appointment.find(filters)
+      .populate('patient', 'MRH name')
+      .populate({
+        path: 'doctor',
+        populate: {
+          path: 'user',
+          select: 'name email phone'
+        }
+      })
+      .sort({ timeSlot: 1 });
     res.status(200).json(apiResponse({ success: true, message: 'Doctor schedule retrieved', data: schedule }));
   } catch (error) {
     next(error);
@@ -95,7 +111,13 @@ exports.getTodayQueue = async (req, res, next) => {
       status: { $in: ['scheduled', 'checked_in', 'in_progress'] }
     })
       .populate('patient', 'MRH name')
-      .populate('doctor', 'name')
+      .populate({
+        path: 'doctor',
+        populate: {
+          path: 'user',
+          select: 'name email phone'
+        }
+      })
       .sort({ tokenNumber: 1 });
     res.status(200).json(apiResponse({ success: true, message: 'Today queue retrieved', data: queue }));
   } catch (error) {

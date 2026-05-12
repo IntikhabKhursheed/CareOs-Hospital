@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import appointmentService from '../../services/appointmentService';
 import patientService from '../../services/patientService';
+import doctorService from '../../services/doctorService';
 
 const typeConfig = {
   new: { label: 'New Visit', color: 'bg-indigo-100 text-indigo-700 border-indigo-200', dot: 'bg-indigo-500' },
@@ -33,11 +34,9 @@ export default function AppointmentForm() {
     patientService.getPatients({ limit: 100 })
       .then(res => setPatients(res.data?.patients || res.data?.data?.patients || []))
       .catch(() => {});
-    fetch("http://localhost:5000/api/users?role=doctor&limit=100", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("careos_token") || localStorage.getItem("token")}` }
-    }).then(r => r.json()).then(data => {
-      setDoctors(data?.data?.users || data?.data || []);
-    }).catch(() => {});
+    doctorService.getDoctors({ limit: 100 })
+      .then(res => setDoctors(res.data?.doctors || []))
+      .catch(() => {});
   }, []);
 
   const update = (e) => {
@@ -195,7 +194,7 @@ export default function AppointmentForm() {
                     {doctors.length > 0
                       ? doctors.map(d => (
                           <option key={d._id} value={d._id}>
-                            Dr. {d.name}{d.specialization ? ` — ${d.specialization}` : ''}
+                            Dr. {d.user?.name || 'Unknown'}{d.specialization ? ` — ${d.specialization}` : ''}{d.department ? ` (${d.department})` : ''}
                           </option>
                         ))
                       : <option disabled>No doctors found — add doctors first</option>

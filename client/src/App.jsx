@@ -17,6 +17,8 @@ import PatientProfile from './pages/patients/PatientProfile';
 import AppointmentList from './pages/appointments/AppointmentList';
 import AppointmentForm from './pages/appointments/AppointmentForm';
 import QueueDisplay from './pages/appointments/QueueDisplay';
+import DoctorList from './pages/doctors/DoctorList';
+import DoctorForm from './pages/doctors/DoctorForm';
 import NotFound from './pages/NotFound';
 import Sidebar from './components/layout/Sidebar';
 import { navigateTo, subscribeNavigation } from './utils/navigation';
@@ -25,6 +27,7 @@ const getNavItems = (role) => {
   const adminItems = [
     { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
     { label: 'Patients', path: '/patients', icon: <Users size={18} /> },
+    { label: 'Doctors', path: '/doctors', icon: <Stethoscope size={18} /> },
     { label: 'Appointments', path: '/appointments', icon: <Calendar size={18} /> },
     { label: 'New Patient', path: '/patients/new', icon: <UserPlus size={18} /> },
     { label: 'Queue', path: '/appointments/queue', icon: <Clock size={18} /> },
@@ -106,6 +109,8 @@ function App() {
     if (path === '/appointments/new') return <AppointmentForm />;
     if (path === '/appointments/queue') return <QueueDisplay />;
     if (path === '/appointments') return <AppointmentList />;
+    if (path === '/doctors/new') return <DoctorForm />;
+    if (path === '/doctors') return <DoctorList />;
     return <NotFound />;
   }, [path, user]);
 

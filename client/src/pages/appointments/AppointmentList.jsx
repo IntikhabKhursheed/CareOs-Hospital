@@ -120,7 +120,7 @@ const AppointmentList = () => {
                 : appointments.map((item) => (
                     <TableRow key={item._id}>
                       <TableCell className="font-semibold text-[var(--text-primary)]">{item.patient?.name || 'Unknown'}</TableCell>
-                      <TableCell>{item.doctor?.name || 'Unknown'}</TableCell>
+                      <TableCell>{item.doctor?.user?.name || 'Unknown'}</TableCell>
                       <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[item.status] || 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}>
