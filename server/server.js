@@ -64,6 +64,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/tests', testCatalogRoutes);
 app.use('/api/lab-requests', labTestRequestRoutes);
+app.use('/api/lab-orders', require('./routes/labOrderRoutes'));
 app.use('/api/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
 app.use('/api/billing', billingRoutes);

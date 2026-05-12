@@ -1,42 +1,35 @@
 import { useEffect, useState } from 'react';
 import { navigateTo } from '../../utils/navigation';
-import { Edit } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import patientService from '../../services/patientService';
-import testService from '../../services/testService';
+import labOrderService from '../../services/labOrderService';
+import OrderTestsModal from '../../components/OrderTestsModal';
 
 const PatientProfile = () => {
   const [patient, setPatient] = useState(null);
   const [history, setHistory] = useState({ appointments: [], visits: [] });
+  const [labHistory, setLabHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [availableTests, setAvailableTests] = useState([]);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [expandedOrders, setExpandedOrders] = useState({});
   const id = new URLSearchParams(window.location.search).get('id');
 
-  const handleAssignTest = async (testId) => {
-    if (!testId || !id) return;
-    
-    try {
-      await patientService.assignTests({ patientId: id, testIds: [testId] });
-      // Refresh patient data
-      const response = await patientService.getPatientById(id);
-      setPatient(response.data);
-      
-      // Reset dropdown
-      document.getElementById('testSelect').value = '';
-    } catch (error) {
-      console.error('Failed to assign test:', error);
-    }
+  
+  const toggleOrderExpansion = (orderId) => {
+    setExpandedOrders(prev => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }));
   };
 
-  const handleRemoveTest = async (testId) => {
-    if (!testId || !id) return;
-    
+  const loadLabHistory = async () => {
     try {
-      await patientService.removeTests({ patientId: id, testIds: [testId] });
-      // Refresh patient data
-      const response = await patientService.getPatientById(id);
-      setPatient(response.data);
+      const response = await labOrderService.getPatientLabHistory(id);
+      setLabHistory(response.data || []);
     } catch (error) {
-      console.error('Failed to remove test:', error);
+      console.error('Failed to load lab history:', error);
+      setLabHistory([]);
     }
   };
 
@@ -53,14 +46,9 @@ const PatientProfile = () => {
         setPatient(response.data);
         setHistory(historyResponse.data);
         
-        // Load available tests for assignment display
-        try {
-          const testsResponse = await testService.getAllTests({ limit: 100 });
-          setAvailableTests(testsResponse.data.allTests || []);
-        } catch (error) {
-          console.error('Failed to load tests:', error);
-          setAvailableTests([]);
-        }
+                
+        // Load lab history
+        await loadLabHistory();
       } catch (error) {
         console.error(error);
       } finally {
@@ -119,7 +107,7 @@ const PatientProfile = () => {
 
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Medical summary</h2>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Medical summary</h2>
             <p className="mt-4 text-[var(--text-secondary)]">Allergies</p>
             <p className="mt-2 text-[var(--text-primary)]">{patient?.allergies?.length ? patient.allergies.join(', ') : 'None'}</p>
             <p className="mt-4 text-[var(--text-secondary)]">Chronic conditions</p>
@@ -144,64 +132,11 @@ const PatientProfile = () => {
             </div>
 
             <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-[var(--text-primary)]">Assigned Tests</h3>
-                <div className="flex items-center gap-2">
-                  <select
-                    id="testSelect"
-                    className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-                    value=""
-                    onChange={(e) => handleAssignTest(e.target.value)}
-                  >
-                    <option value="">Assign test...</option>
-                    {availableTests.map(test => (
-                      <option key={test._id} value={test._id}>
-                        {test.testCode} - {test.testName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Recent Lab Orders</h3>
+              <div className="text-sm text-[var(--text-secondary)]">
+                <p>Use the "Order Tests" button above to create new lab orders for this patient.</p>
+                <p className="mt-2">View complete lab history in the Lab History section below.</p>
               </div>
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>Patient:</strong> {patient?.name || 'Unknown'} | <strong>MRH:</strong> {patient?.MRH || 'N/A'}
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  <strong>Assigned by:</strong> {localStorage.getItem('careos_userName') || 'Current User'}
-                </p>
-              </div>
-              {patient?.tests && patient.tests.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {patient.tests.map((testId, index) => {
-                    const test = availableTests.find(t => t._id === testId);
-                    return test ? (
-                      <div key={testId} className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-semibold text-[var(--text-primary)]">{test.testCode}</h4>
-                            <p className="text-sm text-[var(--text-secondary)]">{test.testName}</p>
-                            <p className="text-xs text-[var(--text-secondary)]">{test.category} • {test.department}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="text-sm text-[var(--text-secondary)]">
-                              <p><strong>Price:</strong> PKR {test.price}</p>
-                              <p><strong>TAT:</strong> {test.turnaroundHours} hours</p>
-                            </div>
-                            <button
-                              onClick={() => handleRemoveTest(testId)}
-                              className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              ) : (
-                <p className="mt-4 text-[var(--text-secondary)]">No tests assigned to this patient.</p>
-              )}
             </div>
 
             <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
@@ -221,7 +156,141 @@ const PatientProfile = () => {
             </div>
           </div>
         </section>
+
+        {/* Order Tests Section */}
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-8 shadow-sm mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">Order Lab Tests</h2>
+              <p className="text-[var(--text-secondary)]">Order comprehensive lab tests for this patient with priority selection and clinical notes.</p>
+            </div>
+            <button
+              onClick={() => setShowOrderModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors font-medium"
+            >
+              <Plus className="h-5 w-5" />
+              Order Tests
+            </button>
+          </div>
+        </section>
+
+        {/* Lab History Section */}
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-8 shadow-sm">
+          <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-6">Lab History</h2>
+          {labHistory.length ? (
+            <div className="space-y-4">
+              {labHistory.map((order) => (
+                <div key={order._id} className="border border-[var(--border)] rounded-lg bg-[var(--bg-secondary)] p-4">
+                  <div 
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => toggleOrderExpansion(order._id)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-sm bg-primary/20 text-primary px-2 py-1 rounded">
+                          {order.orderNumber}
+                        </span>
+                        <span className="text-sm text-[var(--text-secondary)]">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className={`px-2 py-1 text-xs rounded ${
+                          order.overallStatus === 'completed' ? 'bg-green-100 text-green-800' :
+                          order.overallStatus === 'partial' ? 'bg-amber-100 text-amber-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.overallStatus.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        {order.tests?.map((test, index) => (
+                          <span key={index} className="text-xs bg-[var(--bg-primary)] px-2 py-1 rounded">
+                            {test.test?.testCode}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      {expandedOrders[order._id] ? (
+                        <ChevronUp className="h-5 w-5 text-[var(--text-secondary)]" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-[var(--text-secondary)]" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {expandedOrders[order._id] && (
+                    <div className="mt-4 space-y-3 border-t border-[var(--border)] pt-4">
+                      {order.tests?.map((test, testIndex) => (
+                        <div key={testIndex} className="bg-[var(--bg-card)] p-3 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="font-medium text-[var(--text-primary)]">
+                                {test.test?.testName}
+                              </h4>
+                              <p className="text-sm text-[var(--text-secondary)]">
+                                {test.test?.category} • {test.test?.department}
+                              </p>
+                            </div>
+                            <span className={`px-2 py-1 text-xs rounded ${
+                              test.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              test.status === 'sample_collected' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {test.status?.replace('_', ' ') || 'ordered'}
+                            </span>
+                          </div>
+                          
+                          {test.results?.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              {test.results.map((result, resultIndex) => (
+                                <div key={resultIndex} className="flex justify-between items-center text-sm">
+                                  <span className="text-[var(--text-secondary)]">{result.parameter}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-[var(--text-primary)]">
+                                      {result.value} {result.unit}
+                                    </span>
+                                    {result.flag !== 'normal' && (
+                                      <span className={`px-1 py-0.5 text-xs rounded ${
+                                        result.flag.includes('critical') ? 'bg-red-100 text-red-800' :
+                                        result.flag.includes('low') ? 'bg-blue-100 text-blue-800' :
+                                        'bg-amber-100 text-amber-800'
+                                      }`}>
+                                        {result.flag.replace('_', ' ')}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {test.aiInterpretation && (
+                            <div className="mt-3 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                              <p className="text-sm font-medium text-indigo-800 mb-1">AI Interpretation</p>
+                              <p className="text-sm text-indigo-700">{test.aiInterpretation}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-[var(--text-secondary)]">
+              No lab orders found for this patient.
+            </div>
+          )}
+        </section>
       </div>
+
+      {/* Order Tests Modal */}
+      <OrderTestsModal
+        isOpen={showOrderModal}
+        onClose={() => setShowOrderModal(false)}
+        patientId={id}
+      />
     </div>
   );
 };

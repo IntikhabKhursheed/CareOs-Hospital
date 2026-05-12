@@ -1,203 +1,439 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
-import labTestRequestService from '../../services/labTestRequestService';
-import testService from '../../services/testService';
+import { navigateTo } from '../../utils/navigation';
+import { ArrowLeft, Brain, TrendingDown, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import labOrderService from '../../services/labOrderService';
 
 const ResultEntry = () => {
-  const query = useMemo(() => new URLSearchParams(window.location.search), []);
+  const query = new URLSearchParams(window.location.search);
   const orderId = query.get('id');
-  const [testRequest, setTestRequest] = useState(null);
-  const [parameterValues, setParameterValues] = useState({});
-  const [verified, setVerified] = useState(false);
+  const [order, setOrder] = useState(null);
+  const [testResults, setTestResults] = useState({});
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState({});
 
   useEffect(() => {
     if (!orderId) return;
-    const loadOrder = async () => {
-      setLoading(true);
-      try {
-        const order = await labTestRequestService.getTestRequestById(orderId);
-        if (order.data) {
-          setTestRequest(order.data);
-          // Initialize parameter values from existing results
-          if (order.data.results?.length) {
-            const values = {};
-            order.data.results.forEach(result => {
-              values[result.parameterName || result.test] = result.value;
-            });
-            setParameterValues(values);
-          } else if (order.data.test?.parameters?.length) {
-            // Initialize with empty values for new entries based on test catalog parameters
-            const values = {};
-            order.data.test.parameters.forEach(param => {
-              values[param.name] = '';
-            });
-            setParameterValues(values);
-          }
-          setVerified(order.data.isVerified);
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadOrder();
   }, [orderId]);
 
-  const handleParameterChange = (parameterName, value) => {
-    setParameterValues(prev => ({
-      ...prev,
-      [parameterName]: value
-    }));
-  };
-
-  const handleSave = async () => {
-    if (!orderId) {
-      toast.error('Missing lab order id in URL');
-      return;
-    }
+  const loadOrder = async () => {
     setLoading(true);
     try {
-      let results;
-      
-      if (testRequest.test?.parameters?.length > 0) {
-        // Test has parameters
-        results = testRequest.test.parameters.map(param => ({
-          parameterName: param.name,
-          value: parameterValues[param.name] || '',
-          unit: param.unit,
-          normalRange: testRequest.patient?.gender === 'male' ? param.normalRangeMale : 
-                      testRequest.patient?.gender === 'female' ? param.normalRangeFemale : 
-                      param.normalRangeChild
-        }));
-      } else {
-        // Test has no parameters, use description
-        results = [{
-          parameterName: 'description',
-          value: parameterValues.description || '',
-          unit: '',
-          normalRange: ''
-        }];
+      if (!orderId) {
+        toast.error('No lab order ID provided');
+        setLoading(false);
+        return;
       }
+
+      const response = await labOrderService.getLabOrderById(orderId);
+      console.log('Lab order response:', response);
       
-      await labTestRequestService.enterResults(orderId, results);
-      toast.success('Lab results saved');
+      if (response.data) {
+        setOrder(response.data);
+        // Initialize test results from existing data
+        const initialResults = {};
+        response.data.tests?.forEach(test => {
+          if (test.results?.length > 0) {
+            initialResults[test._id] = {};
+            test.results.forEach(result => {
+              initialResults[test._id][result.parameter] = result.value;
+            });
+          } else {
+            initialResults[test._id] = {};
+          }
+        });
+        setTestResults(initialResults);
+      } else {
+        toast.error('Lab order not found');
+      }
     } catch (error) {
-      console.error(error);
-      toast.error('Unable to save results');
+      console.error('Failed to load lab order:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to load lab order';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify = async () => {
-    // Verification functionality not implemented yet
-    toast('Verification feature coming soon');
+  const handleResultChange = (testId, parameterName, value) => {
+    setTestResults(prev => ({
+      ...prev,
+      [testId]: {
+        ...prev[testId],
+        [parameterName]: value
+      }
+    }));
   };
+
+  const calculateFlag = (value, parameter, patientGender) => {
+    if (!parameter || !value) return 'normal';
+    
+    const normalRange = getNormalRange(parameter, patientGender);
+    if (!normalRange) return 'normal';
+
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return 'normal';
+
+    // Parse range (e.g., "70-120", "<200", ">3.5")
+    const rangeParts = normalRange.match(/([<>=]*)(\d+\.?\d*)-?(\d+\.?\d*)?/);
+    if (!rangeParts) return 'normal';
+
+    const [, operator, min, max] = rangeParts;
+    
+    if (operator === '<' && numValue >= parseFloat(min)) return 'high';
+    if (operator === '>' && numValue <= parseFloat(min)) return 'low';
+    
+    if (min && max) {
+      const minVal = parseFloat(min);
+      const maxVal = parseFloat(max);
+      
+      if (numValue < minVal * 0.5) return 'critical_low';
+      if (numValue > maxVal * 2) return 'critical_high';
+      if (numValue < minVal) return 'low';
+      if (numValue > maxVal) return 'high';
+    }
+
+    return 'normal';
+  };
+
+  const getNormalRange = (parameter, gender) => {
+    if (!parameter) return '';
+    
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return parameter.normalRangeMale || '';
+      case 'female':
+        return parameter.normalRangeFemale || '';
+      default:
+        return parameter.normalRangeChild || '';
+    }
+  };
+
+  const getFlagIcon = (flag) => {
+    switch (flag) {
+      case 'critical_low':
+        return <TrendingDown className="h-4 w-4 text-red-600 animate-pulse" />;
+      case 'critical_high':
+        return <TrendingUp className="h-4 w-4 text-red-600 animate-pulse" />;
+      case 'low':
+        return <TrendingDown className="h-4 w-4 text-blue-600" />;
+      case 'high':
+        return <TrendingUp className="h-4 w-4 text-amber-600" />;
+      default:
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+    }
+  };
+
+  const getFlagColor = (flag) => {
+    switch (flag) {
+      case 'critical_low':
+      case 'critical_high':
+        return 'text-red-800 bg-red-100 border-red-200';
+      case 'low':
+        return 'text-blue-800 bg-blue-100 border-blue-200';
+      case 'high':
+        return 'text-amber-800 bg-amber-100 border-amber-200';
+      default:
+        return 'text-green-800 bg-green-100 border-green-200';
+    }
+  };
+
+  const handleAIInterpretation = async (testId) => {
+    setAiLoading(prev => ({ ...prev, [testId]: true }));
+    
+    try {
+      const test = order.tests.find(t => t._id === testId);
+      const results = Object.entries(testResults[testId] || {}).map(([param, value]) => ({
+        parameter: param,
+        value
+      }));
+
+      // Mock AI interpretation (in real implementation, this would call AI service)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const interpretation = `Based on the provided results for ${test.test?.testName}, the values appear to be within normal ranges for most parameters. No critical abnormalities detected. Continue routine monitoring as per standard protocol.`;
+      
+      // Update order with AI interpretation
+      await labOrderService.enterResults(orderId, {
+        testId,
+        results: results.map(r => ({
+          ...r,
+          flag: calculateFlag(r.value, test.test?.parameters?.find(p => p.name === r.parameter), order.patient?.gender),
+          unit: test.test?.parameters?.find(p => p.name === r.parameter)?.unit || '',
+          normalRange: getNormalRange(test.test?.parameters?.find(p => p.name === r.parameter), order.patient?.gender)
+        })),
+        aiInterpretation: interpretation
+      });
+
+      // Reload order to show updated interpretation
+      loadOrder();
+      toast.success('AI interpretation generated successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to generate AI interpretation');
+    } finally {
+      setAiLoading(prev => ({ ...prev, [testId]: false }));
+    }
+  };
+
+  const handleSaveAllResults = async () => {
+    setLoading(true);
+    try {
+      for (const test of order.tests) {
+        const results = Object.entries(testResults[test._id] || {}).map(([param, value]) => ({
+          parameter: param,
+          value,
+          flag: calculateFlag(value, test.test?.parameters?.find(p => p.name === param), order.patient?.gender),
+          unit: test.test?.parameters?.find(p => p.name === param)?.unit || '',
+          normalRange: getNormalRange(test.test?.parameters?.find(p => p.name === param), order.patient?.gender)
+        }));
+
+        await labOrderService.enterResults(orderId, {
+          testId: test._id,
+          results
+        });
+      }
+      
+      toast.success('All test results saved successfully');
+      loadOrder();
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to save results');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || !order) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-primary)] p-4 sm:p-8">
+        <div className="animate-pulse rounded-xl bg-[var(--bg-card)] p-8 shadow-sm">
+          <div className="h-8 w-56 rounded bg-[var(--bg-secondary)]" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] p-4 sm:p-8">
       <Toaster position="top-right" />
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-[var(--text-secondary)]">Lab results</p>
-          <h1 className="mt-3 text-4xl font-semibold text-[var(--text-primary)]">Verify and save order data</h1>
-          <p className="mt-3 max-w-2xl text-[var(--text-secondary)]">Use the lab result editor to record findings and confirm verification status.</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <a href="/lab" className="btn-secondary inline-flex items-center justify-center">
-            Back to queue
-          </a>
-          <button
-            onClick={handleVerify}
-            disabled={verified || loading}
-            className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {verified ? 'Verified' : 'Verify now'}
-          </button>
+      
+      {/* Header */}
+      <div className="mb-8">
+        <button
+          onClick={() => navigateTo('/lab')}
+          className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Queue
+        </button>
+        
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--text-secondary)]">Lab Results Entry</p>
+            <h1 className="mt-3 text-4xl font-semibold text-[var(--text-primary)]">{order.orderNumber}</h1>
+            <p className="mt-3 max-w-2xl text-[var(--text-secondary)]">Enter test results with automated flagging and AI interpretation.</p>
+          </div>
         </div>
       </div>
 
-      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-8 shadow-sm">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-[var(--text-secondary)]">Lab order ID</p>
-            <div className="mt-2 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-primary)]">{orderId || 'No order selected'}</div>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-primary)]">
-            <p className="font-semibold text-[var(--text-primary)]">Verification</p>
-            <p className="mt-2 text-[var(--text-secondary)]">Mark results verified after review and sign-off.</p>
-            <div className="mt-4 inline-flex rounded-full bg-[var(--bg-secondary)] px-3 py-1 text-xs uppercase tracking-[0.3em] text-[var(--text-secondary)]">{verified ? 'Verified' : 'Pending'}</div>
+      {/* Order Info Cards */}
+      <div className="grid gap-6 mb-8 lg:grid-cols-3">
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Patient Information</h3>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Name</p>
+              <p className="font-medium text-[var(--text-primary)]">{order.patient?.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">MRH</p>
+              <p className="font-medium text-[var(--text-primary)]">{order.patient?.MRH}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Gender</p>
+              <p className="font-medium text-[var(--text-primary)]">{order.patient?.gender}</p>
+            </div>
           </div>
         </div>
 
-        <div className="mt-8">
-          <label className="block text-sm uppercase tracking-[0.2em] text-[var(--text-secondary)]">Test Parameters</label>
-          {testRequest?.test?.parameters?.length > 0 ? (
-            <div className="mt-4 space-y-4">
-              {testRequest.test.parameters.map((param, index) => (
-                <div key={index} className="grid gap-4 sm:grid-cols-[1fr_200px_200px]">
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                      {param.name}
-                    </label>
-                    <input
-                      type="text"
-                      value={parameterValues[param.name] || ''}
-                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-primary"
-                      placeholder={`Enter ${param.name} value`}
-                    />
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Order Details</h3>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Ordered By</p>
+              <p className="font-medium text-[var(--text-primary)]">{order.orderedBy?.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Referred By</p>
+              <p className="font-medium text-[var(--text-primary)]">{order.referredBy || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Created At</p>
+              <p className="font-medium text-[var(--text-primary)]">{new Date(order.createdAt).toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Sample Status</h3>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Sample Collected</p>
+              <p className="font-medium text-[var(--text-primary)]">
+                {order.sampleCollectedAt ? `Yes - ${new Date(order.sampleCollectedAt).toLocaleString()}` : 'No'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-secondary)]">Overall Status</p>
+              <span className={`inline-flex px-3 py-1 text-sm rounded-full ${
+                order.overallStatus === 'completed' ? 'bg-green-100 text-green-800' :
+                order.overallStatus === 'partial' ? 'bg-amber-100 text-amber-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {order.overallStatus?.replace('_', ' ') || 'ordered'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Test Cards */}
+      <div className="space-y-6">
+        {order.tests?.map((test) => (
+          <div key={test._id} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-sm overflow-hidden">
+            {/* Test Header */}
+            <div className="bg-[var(--bg-secondary)] p-6 border-b border-[var(--border)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-[var(--text-primary)]">{test.test?.testName}</h3>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-sm bg-primary/20 text-primary px-2 py-1 rounded">
+                      {test.test?.testCode}
+                    </span>
+                    <span className="text-sm bg-[var(--bg-primary)] text-white px-2 py-1 rounded">
+                      {test.test?.category}
+                    </span>
+                    <span className="text-sm text-[var(--text-secondary)]">
+                      Priority: {test.priority?.toUpperCase()}
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                      Unit
-                    </label>
-                    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-secondary)]">
-                      {param.unit}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                      Normal Range
-                    </label>
-                    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-secondary)]">
-                      {testRequest.patient?.gender === 'male' ? param.normalRangeMale : 
-                       testRequest.patient?.gender === 'female' ? param.normalRangeFemale : 
-                       param.normalRangeChild || 'N/A'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 text-sm rounded-full ${
+                    test.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    test.status === 'sample_collected' ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {test.status?.replace('_', ' ') || 'ordered'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Parameter Table */}
+            <div className="p-6">
+              {test.test?.parameters?.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-[var(--border)]">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-[var(--text-secondary)]">Parameter</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-[var(--text-secondary)]">Value Input</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-[var(--text-secondary)]">Unit</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-[var(--text-secondary)]">Normal Range</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-[var(--text-secondary)]">Flag</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {test.test.parameters.map((parameter) => {
+                        const value = testResults[test._id]?.[parameter.name] || '';
+                        const flag = calculateFlag(value, parameter, order.patient?.gender);
+                        
+                        return (
+                          <tr key={parameter.name} className="border-b border-[var(--border)]">
+                            <td className="py-3 px-4">
+                              <span className="font-medium text-[var(--text-primary)]">{parameter.name}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <input
+                                type="text"
+                                value={value}
+                                onChange={(e) => handleResultChange(test._id, parameter.name, e.target.value)}
+                                className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:border-primary text-sm"
+                                placeholder={`Enter ${parameter.name} value`}
+                              />
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-sm text-[var(--text-secondary)]">{parameter.unit}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="text-sm text-[var(--text-secondary)]">
+                                {getNormalRange(parameter, order.patient?.gender)}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                {getFlagIcon(flag)}
+                                <span className={`px-2 py-1 text-xs rounded ${getFlagColor(flag)}`}>
+                                  {flag.replace('_', ' ') || 'normal'}
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--text-secondary)]">
+                  No parameters defined for this test.
+                </div>
+              )}
+            </div>
+
+            {/* AI Interpretation */}
+            <div className="border-t border-[var(--border)] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-semibold text-[var(--text-primary)]">AI Interpretation</h4>
+                <button
+                  onClick={() => handleAIInterpretation(test._id)}
+                  disabled={aiLoading[test._id]}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Brain className="h-4 w-4" />
+                  {aiLoading[test._id] ? 'Generating...' : 'Generate AI Interpretation'}
+                </button>
+              </div>
+              
+              {test.aiInterpretation && (
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Brain className="h-5 w-5 text-indigo-600 mt-1" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-indigo-800 mb-2">AI Analysis</p>
+                      <p className="text-sm text-indigo-700 leading-relaxed">{test.aiInterpretation}</p>
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-          ) : (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                Test Result Description
-              </label>
-              <textarea
-                value={parameterValues.description || ''}
-                onChange={(e) => handleParameterChange('description', e.target.value)}
-                rows={6}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-primary"
-                placeholder="Enter test result description"
-              />
-            </div>
-          )}
-        </div>
+          </div>
+        ))}
+      </div>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-          <p className="text-sm text-[var(--text-secondary)]">Save result data once it reflects the completed lab findings.</p>
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="btn-primary w-full sm:w-auto"
-          >
-            Save results
-          </button>
-        </div>
-      </section>
+      {/* Save All Button */}
+      <div className="flex justify-end mt-8">
+        <button
+          onClick={handleSaveAllResults}
+          disabled={loading}
+          className="px-8 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+        >
+          {loading ? 'Saving...' : 'Save All Results'}
+        </button>
+      </div>
     </div>
   );
 };

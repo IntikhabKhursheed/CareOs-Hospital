@@ -13,6 +13,11 @@ const getAllTests = async (params) => {
   return response.data;
 };
 
+const getTests = async () => {
+  const response = await dedupedGet(apiClient, '/tests');
+  return response.data;
+};
+
 const searchTests = async (params) => {
   const response = await dedupedGet(apiClient, '/tests/search', { params });
   return response.data;
@@ -36,6 +41,7 @@ const deleteTest = async (id) => {
 export default {
   createTest,
   getAllTests,
+  getTests,
   searchTests,
   getTestById,
   updateTest,
