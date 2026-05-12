@@ -19,6 +19,8 @@ import AppointmentForm from './pages/appointments/AppointmentForm';
 import QueueDisplay from './pages/appointments/QueueDisplay';
 import DoctorList from './pages/doctors/DoctorList';
 import DoctorForm from './pages/doctors/DoctorForm';
+import TestCatalogList from './pages/tests/TestCatalogList';
+import TestCatalogForm from './pages/tests/TestCatalogForm';
 import NotFound from './pages/NotFound';
 import Sidebar from './components/layout/Sidebar';
 import { navigateTo, subscribeNavigation } from './utils/navigation';
@@ -32,6 +34,7 @@ const getNavItems = (role) => {
     { label: 'New Patient', path: '/patients/new', icon: <UserPlus size={18} /> },
     { label: 'Queue', path: '/appointments/queue', icon: <Clock size={18} /> },
     { label: 'Lab Queue', path: '/lab', icon: <FlaskConical size={18} /> },
+    { label: 'Test Catalog', path: '/tests', icon: <FlaskConical size={18} /> },
     { label: 'Billing', path: '/billing', icon: <Receipt size={18} /> },
     { label: 'Patient Portal', path: '/portal', icon: <Shield size={18} /> }
   ];
@@ -111,6 +114,8 @@ function App() {
     if (path === '/appointments') return <AppointmentList />;
     if (path === '/doctors/new') return <DoctorForm />;
     if (path === '/doctors') return <DoctorList />;
+    if (path === '/tests/new') return <TestCatalogForm />;
+    if (path === '/tests') return <TestCatalogList />;
     return <NotFound />;
   }, [path, user]);
 

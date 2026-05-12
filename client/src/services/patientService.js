@@ -33,11 +33,31 @@ const deletePatient = async (id) => {
   return response.data;
 };
 
+const assignTests = async (payload) => {
+  const response = await apiClient.post(`/patients/${payload.patientId}/assign-tests`, { 
+    patientId: payload.patientId, 
+    testIds: payload.testIds 
+  });
+  return response.data;
+};
+
+const removeTests = async (payload) => {
+  const response = await apiClient.delete(`/patients/${payload.patientId}/remove-tests`, { 
+    data: { 
+      patientId: payload.patientId, 
+      testIds: payload.testIds 
+    } 
+  });
+  return response.data;
+};
+
 export default {
   createPatient,
   getPatients,
   getPatientById,
   updatePatient,
   getPatientHistory,
-  deletePatient
+  deletePatient,
+  assignTests,
+  removeTests
 };

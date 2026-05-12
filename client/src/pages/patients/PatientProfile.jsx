@@ -1,11 +1,44 @@
 import { useEffect, useState } from 'react';
+import { navigateTo } from '../../utils/navigation';
+import { Edit } from 'lucide-react';
 import patientService from '../../services/patientService';
+import testService from '../../services/testService';
 
 const PatientProfile = () => {
   const [patient, setPatient] = useState(null);
   const [history, setHistory] = useState({ appointments: [], visits: [] });
   const [loading, setLoading] = useState(true);
+  const [availableTests, setAvailableTests] = useState([]);
   const id = new URLSearchParams(window.location.search).get('id');
+
+  const handleAssignTest = async (testId) => {
+    if (!testId || !id) return;
+    
+    try {
+      await patientService.assignTests({ patientId: id, testIds: [testId] });
+      // Refresh patient data
+      const response = await patientService.getPatientById(id);
+      setPatient(response.data);
+      
+      // Reset dropdown
+      document.getElementById('testSelect').value = '';
+    } catch (error) {
+      console.error('Failed to assign test:', error);
+    }
+  };
+
+  const handleRemoveTest = async (testId) => {
+    if (!testId || !id) return;
+    
+    try {
+      await patientService.removeTests({ patientId: id, testIds: [testId] });
+      // Refresh patient data
+      const response = await patientService.getPatientById(id);
+      setPatient(response.data);
+    } catch (error) {
+      console.error('Failed to remove test:', error);
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -19,6 +52,15 @@ const PatientProfile = () => {
         const historyResponse = await patientService.getPatientHistory(id);
         setPatient(response.data);
         setHistory(historyResponse.data);
+        
+        // Load available tests for assignment display
+        try {
+          const testsResponse = await testService.getAllTests({ limit: 100 });
+          setAvailableTests(testsResponse.data.allTests || []);
+        } catch (error) {
+          console.error('Failed to load tests:', error);
+          setAvailableTests([]);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -101,7 +143,68 @@ const PatientProfile = () => {
               )}
             </div>
 
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-sm">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">Assigned Tests</h3>
+                <div className="flex items-center gap-2">
+                  <select
+                    id="testSelect"
+                    className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
+                    value=""
+                    onChange={(e) => handleAssignTest(e.target.value)}
+                  >
+                    <option value="">Assign test...</option>
+                    {availableTests.map(test => (
+                      <option key={test._id} value={test._id}>
+                        {test.testCode} - {test.testName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Patient:</strong> {patient?.name || 'Unknown'} | <strong>MRH:</strong> {patient?.MRH || 'N/A'}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  <strong>Assigned by:</strong> {localStorage.getItem('careos_userName') || 'Current User'}
+                </p>
+              </div>
+              {patient?.tests && patient.tests.length > 0 ? (
+                <div className="mt-4 space-y-3">
+                  {patient.tests.map((testId, index) => {
+                    const test = availableTests.find(t => t._id === testId);
+                    return test ? (
+                      <div key={testId} className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-semibold text-[var(--text-primary)]">{test.testCode}</h4>
+                            <p className="text-sm text-[var(--text-secondary)]">{test.testName}</p>
+                            <p className="text-xs text-[var(--text-secondary)]">{test.category} • {test.department}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-[var(--text-secondary)]">
+                              <p><strong>Price:</strong> PKR {test.price}</p>
+                              <p><strong>TAT:</strong> {test.turnaroundHours} hours</p>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveTest(testId)}
+                              className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              ) : (
+                <p className="mt-4 text-[var(--text-secondary)]">No tests assigned to this patient.</p>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">Visit records</h3>
               {history.visits.length ? (
                 <ul className="mt-4 space-y-4">

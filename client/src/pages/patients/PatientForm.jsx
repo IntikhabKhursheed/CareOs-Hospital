@@ -236,18 +236,11 @@ export default function PatientForm() {
             {step === 3 && (
               <div className="space-y-5">
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex gap-3">
-                  <Users size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                  <p className="text-sm text-emerald-700">This person will be contacted in medical emergencies.</p>
+                  <AlertCircle size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                  <p className="text-sm text-emerald-700">All information has been provided. Ready to create patient record.</p>
                 </div>
-                <InputField label="Contact Full Name" name="emergencyContact" value={formData.emergencyContact} onChange={update} icon={User} placeholder="Emergency contact's full name" />
-                <InputField label="Contact Phone" name="emergencyPhone" type="tel" value={formData.emergencyPhone} onChange={update} icon={Phone} placeholder="+92 300 1234567" />
-                <SelectField label="Relationship" name="emergencyRelationship" value={formData.emergencyRelationship} onChange={update} icon={Users}>
-                  <option value="">Select relationship</option>
-                  {['Spouse','Parent','Child','Sibling','Friend','Guardian','Other'].map(r => <option key={r} value={r}>{r}</option>)}
-                </SelectField>
               </div>
             )}
-
             {error && (
               <div className="mt-5 p-4 bg-red-50 border border-red-200 rounded-2xl flex gap-3">
                 <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />

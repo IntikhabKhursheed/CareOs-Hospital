@@ -16,6 +16,8 @@ const aiRoutes = require('./routes/aiRoutes');
 const labRoutes = require('./routes/labRoutes');
 const billingRoutes = require('./routes/billingRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
+const testCatalogRoutes = require('./routes/testCatalogRoutes');
+const labTestRequestRoutes = require('./routes/labTestRequestRoutes');
 const socketHandler = require('./socket/socketHandler');
 
 dotenv.config();
@@ -60,6 +62,8 @@ app.use(limiter);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/doctors', doctorRoutes);
+app.use('/api/tests', testCatalogRoutes);
+app.use('/api/lab-requests', labTestRequestRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
 app.use('/api/billing', billingRoutes);

@@ -1,6 +1,8 @@
 const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
 const Visit = require('../models/Visit');
+const TestCatalog = require('../models/TestCatalog');
+const LabTestRequest = require('../models/LabTestRequest');
 const generateMRH = require('../utils/generateMRH');
 const apiResponse = require('../utils/apiResponse');
 
@@ -76,6 +78,129 @@ exports.updatePatient = async (req, res, next) => {
       return res.status(404).json(apiResponse({ success: false, message: 'Patient not found', data: null }));
     }
     res.status(200).json(apiResponse({ success: true, message: 'Patient updated successfully', data: patient }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.assignTests = async (req, res, next) => {
+  try {
+    const { patientId, testIds } = req.body;
+    
+    if (!patientId || !testIds || !Array.isArray(testIds)) {
+      return res.status(400).json(apiResponse({
+        success: false,
+        message: 'Patient ID and test IDs array are required',
+        data: null
+      }));
+    }
+
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      return res.status(404).json(apiResponse({
+        success: false,
+        message: 'Patient not found',
+        data: null
+      }));
+    }
+
+    // Validate test IDs
+    const tests = await TestCatalog.find({ _id: { $in: testIds }, isActive: true });
+    if (tests.length !== testIds.length) {
+      return res.status(400).json(apiResponse({
+        success: false,
+        message: 'Some tests not found or inactive',
+        data: null
+      }));
+    }
+
+    // Add tests to patient (avoid duplicates)
+    const existingTestIds = patient.tests || [];
+    const newTestIds = testIds.filter(id => !existingTestIds.includes(id));
+    
+    // Update patient's tests array
+    await Patient.findByIdAndUpdate(
+      patientId,
+      { 
+        $addToSet: { tests: newTestIds }
+      },
+      { new: true }
+    );
+
+    // Create LabTestRequest entries for new test assignments
+    const referrerId = req.user._id;
+    const referrerName = req.user.name;
+    const labRequests = [];
+    
+    for (const testId of newTestIds) {
+      try {
+        const labRequest = await LabTestRequest.create({
+          patient: patientId,
+          test: testId,
+          referrer: referrerId,
+          referrerName,
+          status: 'pending',
+          urgency: 'routine'
+        });
+        
+        // Populate the request for response
+        const populatedRequest = await LabTestRequest.findById(labRequest._id)
+          .populate('test', 'testCode testName category department');
+        
+        labRequests.push(populatedRequest);
+      } catch (error) {
+        console.error('Failed to create lab request for test:', testId, error);
+      }
+    }
+
+    res.status(200).json(apiResponse({
+      success: true,
+      message: 'Tests assigned successfully',
+      data: { 
+        assignedTests: newTestIds.length,
+        labRequests
+      }
+    }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.removeTests = async (req, res, next) => {
+  try {
+    const { patientId, testIds } = req.body;
+    
+    if (!patientId || !testIds || !Array.isArray(testIds)) {
+      return res.status(400).json(apiResponse({
+        success: false,
+        message: 'Patient ID and test IDs array are required',
+        data: null
+      }));
+    }
+
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      return res.status(404).json(apiResponse({
+        success: false,
+        message: 'Patient not found',
+        data: null
+      }));
+    }
+
+    // Remove tests from patient
+    await Patient.findByIdAndUpdate(
+      patientId,
+      { 
+        $pull: { tests: { $in: testIds } }
+      },
+      { new: true }
+    );
+
+    res.status(200).json(apiResponse({
+      success: true,
+      message: 'Tests removed successfully',
+      data: { removedTests: testIds.length }
+    }));
   } catch (error) {
     next(error);
   }

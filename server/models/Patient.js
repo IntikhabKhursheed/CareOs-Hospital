@@ -65,7 +65,11 @@ const patientSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
-    }
+    },
+    tests: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TestCatalog'
+    }]
   },
   { timestamps: true }
 );
