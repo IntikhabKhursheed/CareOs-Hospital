@@ -131,13 +131,13 @@ const PatientProfile = () => {
               )}
             </div>
 
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
+            {/* <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Recent Lab Orders</h3>
               <div className="text-sm text-[var(--text-secondary)]">
                 <p>Use the "Order Tests" button above to create new lab orders for this patient.</p>
                 <p className="mt-2">View complete lab history in the Lab History section below.</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">Visit records</h3>

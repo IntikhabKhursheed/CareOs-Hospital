@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { LayoutDashboard, Users, Calendar, UserPlus, Clock, FlaskConical, Receipt, Shield, Stethoscope, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, UserPlus, Clock, FlaskConical, TestTube2, Receipt, Shield, Stethoscope, Menu, X } from 'lucide-react';
 import Login from './pages/auth/Login';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthContext } from './context/AuthContext';
@@ -34,7 +34,7 @@ const getNavItems = (role) => {
     { label: 'New Patient', path: '/patients/new', icon: <UserPlus size={18} /> },
     { label: 'Queue', path: '/appointments/queue', icon: <Clock size={18} /> },
     { label: 'Lab Queue', path: '/lab', icon: <FlaskConical size={18} /> },
-    { label: 'Test Catalog', path: '/tests', icon: <FlaskConical size={18} /> },
+    { label: 'Test Catalog', path: '/tests', icon: <TestTube2 size={18} /> },
     { label: 'Billing', path: '/billing', icon: <Receipt size={18} /> },
     { label: 'Patient Portal', path: '/portal', icon: <Shield size={18} /> }
   ];

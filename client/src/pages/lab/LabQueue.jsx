@@ -311,7 +311,7 @@ const LabQueue = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      {/* <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
                           {order.tests?.slice(0, 3).map((test, index) => (
                             <span key={index} className="inline-flex items-center px-2 py-1 text-xs bg-[var(--bg-primary)] text-white rounded">
@@ -323,7 +323,22 @@ const LabQueue = () => {
                             <span className="text-xs text-[var(--text-secondary)]">+{order.tests.length - 3} more</span>
                           )}
                         </div>
-                      </td>
+                      </td> */}
+                      <td className="px-6 py-4">
+  <div className="flex flex-wrap gap-1">
+    {order.tests?.slice(0, 3).map((t, i) => (
+      <span key={i} className="inline-block bg-indigo-50 
+      text-indigo-700 text-xs px-2 py-0.5 rounded-md font-medium">
+        {t.test?.testCode || t.test?.testName || '—'}
+      </span>
+    ))}
+    {order.tests?.length > 3 && (
+      <span className="text-xs text-slate-400">
+        +{order.tests.length - 3} more
+      </span>
+    )}
+  </div>
+</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           {hasStatPriority && (

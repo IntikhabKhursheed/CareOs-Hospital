@@ -171,7 +171,7 @@ const OrderTestsModal = ({ isOpen, onClose, patientId }) => {
                   </select>
                 </div>
 
-                <div className="max-h-96 overflow-y-auto space-y-2">
+                <div className="max-h-96 overflow-y-hidden space-y-2">
                   {testsLoading ? (
                     <div className="text-center py-8 text-[var(--text-secondary)]">Loading tests...</div>
                   ) : filteredTests.length === 0 ? (
