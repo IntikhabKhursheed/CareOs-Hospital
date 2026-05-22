@@ -23,6 +23,9 @@ const socketHandler = require('./socket/socketHandler');
 dotenv.config();
 
 const app = express();
+
+app.set('trust proxy', 1);
+
 connectDB();
 
 let server;
