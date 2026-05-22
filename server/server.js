@@ -69,6 +69,13 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
 app.use('/api/billing', billingRoutes);
 
+/* ADD THIS HERE */
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'CareOS API Running'
+  });
+});
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: 'Route not found', data: null });
 });
