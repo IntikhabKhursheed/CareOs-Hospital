@@ -23,17 +23,35 @@ const socketHandler = require('./socket/socketHandler');
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
-});
-
 connectDB();
-app.set('io', io);
+
+let server;
+let io;
+
+if (process.env.VERCEL !== '1') {
+  server = http.createServer(app);
+
+  io = new Server(server, {
+    cors: {
+      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
+
+  app.set('io', io);
+}
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.CLIENT_URL || 'http://localhost:5173',
+//     methods: ['GET', 'POST'],
+//     credentials: true
+//   }
+// });
+
+// connectDB();
+// app.set('io', io);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -89,15 +107,25 @@ app.use((err, req, res, next) => {
   });
 });
 
-socketHandler(io);
 if (process.env.VERCEL !== '1') {
   socketHandler(io);
+
   const PORT = process.env.PORT || 5001;
 
   server.listen(PORT, () => {
     console.log(`CareOS server running on port ${PORT}`);
   });
 }
+
+// socketHandler(io);
+// if (process.env.VERCEL !== '1') {
+//   socketHandler(io);
+//   const PORT = process.env.PORT || 5001;
+
+//   server.listen(PORT, () => {
+//     console.log(`CareOS server running on port ${PORT}`);
+//   });
+// }
 
 module.exports = app;
 
