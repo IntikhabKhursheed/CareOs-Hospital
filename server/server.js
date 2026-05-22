@@ -91,6 +91,7 @@ app.use((err, req, res, next) => {
 
 socketHandler(io);
 if (process.env.VERCEL !== '1') {
+  socketHandler(io);
   const PORT = process.env.PORT || 5001;
 
   server.listen(PORT, () => {
