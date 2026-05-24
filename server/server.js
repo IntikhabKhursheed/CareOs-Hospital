@@ -28,12 +28,27 @@ app.set('trust proxy', 1);
 
 connectDB();
 
-let server;
-let io;
+// let server;
+// let io;
+
+// if (process.env.VERCEL !== '1') {
+//   server = http.createServer(app);
+
+//   io = new Server(server, {
+//     cors: {
+//       origin: process.env.CLIENT_URL || 'http://localhost:5173',
+//       methods: ['GET', 'POST'],
+//       credentials: true
+//     }
+//   });
+
+//   app.set('io', io);
+// }
+const server = http.createServer(app);
+
+let io = null;
 
 if (process.env.VERCEL !== '1') {
-  server = http.createServer(app);
-
   io = new Server(server, {
     cors: {
       origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -44,17 +59,9 @@ if (process.env.VERCEL !== '1') {
 
   app.set('io', io);
 }
-// const server = http.createServer(app);
-// const io = new Server(server, {
-//   cors: {
-//     origin: process.env.CLIENT_URL || 'http://localhost:5173',
-//     methods: ['GET', 'POST'],
-//     credentials: true
-//   }
-// });
 
-// connectDB();
-// app.set('io', io);
+connectDB();
+app.set('io', io);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
