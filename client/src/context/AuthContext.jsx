@@ -22,43 +22,43 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!user) {
-      disconnectSocket();
-      setSocket(null);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!user) {
+  //     disconnectSocket();
+  //     setSocket(null);
+  //     return;
+  //   }
 
-    const sharedSocket = connectSocket();
-    const onConnect = () => {
-      sharedSocket.emit('join_room', 'global');
-    };
-    const onNewAppointment = (data) => {
-      window.dispatchEvent(new CustomEvent('new_appointment', { detail: data }));
-    };
-    const onPatientCalled = (data) => {
-      window.dispatchEvent(new CustomEvent('patient_called', { detail: data }));
-    };
-    const onBedStatusUpdate = (data) => {
-      window.dispatchEvent(new CustomEvent('bed_status_update', { detail: data }));
-    };
+  //   const sharedSocket = connectSocket();
+  //   const onConnect = () => {
+  //     sharedSocket.emit('join_room', 'global');
+  //   };
+  //   const onNewAppointment = (data) => {
+  //     window.dispatchEvent(new CustomEvent('new_appointment', { detail: data }));
+  //   };
+  //   const onPatientCalled = (data) => {
+  //     window.dispatchEvent(new CustomEvent('patient_called', { detail: data }));
+  //   };
+  //   const onBedStatusUpdate = (data) => {
+  //     window.dispatchEvent(new CustomEvent('bed_status_update', { detail: data }));
+  //   };
 
-    sharedSocket.off('connect', onConnect).on('connect', onConnect);
-    sharedSocket.off('new_appointment', onNewAppointment).on('new_appointment', onNewAppointment);
-    sharedSocket.off('patient_called', onPatientCalled).on('patient_called', onPatientCalled);
-    sharedSocket.off('bed_status_update', onBedStatusUpdate).on('bed_status_update', onBedStatusUpdate);
-    if (sharedSocket.connected) {
-      onConnect();
-    }
+  //   sharedSocket.off('connect', onConnect).on('connect', onConnect);
+  //   sharedSocket.off('new_appointment', onNewAppointment).on('new_appointment', onNewAppointment);
+  //   sharedSocket.off('patient_called', onPatientCalled).on('patient_called', onPatientCalled);
+  //   sharedSocket.off('bed_status_update', onBedStatusUpdate).on('bed_status_update', onBedStatusUpdate);
+  //   if (sharedSocket.connected) {
+  //     onConnect();
+  //   }
 
-    setSocket(sharedSocket);
-    return () => {
-      sharedSocket.off('connect', onConnect);
-      sharedSocket.off('new_appointment', onNewAppointment);
-      sharedSocket.off('patient_called', onPatientCalled);
-      sharedSocket.off('bed_status_update', onBedStatusUpdate);
-    };
-  }, [user]);
+  //   setSocket(sharedSocket);
+  //   return () => {
+  //     sharedSocket.off('connect', onConnect);
+  //     sharedSocket.off('new_appointment', onNewAppointment);
+  //     sharedSocket.off('patient_called', onPatientCalled);
+  //     sharedSocket.off('bed_status_update', onBedStatusUpdate);
+  //   };
+  // }, [user]);
 
   const login = async ({ email, password }) => {
     setLoading(true);

@@ -2,7 +2,8 @@ import { io } from 'socket.io-client';
 
 let socketInstance = null;
 
-const getSocketUrl = () => import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+// const getSocketUrl = () => import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const getSocketUrl = () => import.meta.env.VITE_SOCKET_URL;
 
 export const connectSocket = () => {
   if (!socketInstance) {
