@@ -67,21 +67,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://hospital-management-indol.vercel.app'
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:5173',
+    'https://hopital-management-indol.vercel.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   credentials: true
-}));
+}))
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(compression());
