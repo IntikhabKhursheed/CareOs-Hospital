@@ -116,12 +116,22 @@ app.use((err, req, res, next) => {
   });
 });
 
-if (process.env.VERCEL !== '1') {
-  socketHandler(io);
-  const PORT = process.env.PORT || 5001;
-  server.listen(PORT, () => {
-    console.log(`CareOS server running on port ${PORT}`);
+// if (process.env.VERCEL !== '1') {
+//   socketHandler(io);
+//   const PORT = process.env.PORT || 5001;
+//   server.listen(PORT, () => {
+//     console.log(`CareOS server running on port ${PORT}`);
+//   });
+// }
+
+// module.exports = app;
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    data: err.data || null,
   });
-}
+});
 
 module.exports = app;
