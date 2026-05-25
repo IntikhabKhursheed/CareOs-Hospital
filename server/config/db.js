@@ -9,85 +9,36 @@ const connectDB = async () => {
     const uri = process.env.MONGODB_URI;
 
     if (!uri) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
+      console.error('MONGODB_URI is not defined in environment variables');
+      return;
     }
 
     if (!uri.startsWith('mongodb://') && !uri.startsWith('mongodb+srv://')) {
-      throw new Error('Invalid MongoDB URI. It must start with mongodb:// or mongodb+srv://');
+      console.error('Invalid MongoDB URI. It must start with mongodb:// or mongodb+srv://');
+      return;
     }
 
-    dns.setServers(['8.8.8.8', '1.1.1.1']);
+    // Attempt to set DNS servers to Google and Cloudflare to resolve MongoDB SRV cluster lookups (ECONNREFUSED)
+    try {
+      dns.setServers(['8.8.8.8', '1.1.1.1']);
+      console.log('DNS servers configured successfully for SRV lookups');
+    } catch (dnsErr) {
+      console.warn('Failed to set custom DNS servers (this is normal in some serverless environments):', dnsErr.message);
+    }
 
+    // Connect without blocking / crashing the serverless instance on failure
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 30000
+      serverSelectionTimeoutMS: 15000 // 15 seconds is better than 30 for Vercel timeout limits
     });
 
     console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+    // Never call process.exit(1) on Vercel as it crashes the entire serverless container
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
   }
 };
 
 module.exports = connectDB;
-
-// const mongoose = require('mongoose');
-// const dotenv = require('dotenv');
-
-// dotenv.config();
-
-// const connectDB = async () => {
-//   try {
-//     const uri = process.env.MONGODB_URI;
-
-//     if (!uri) {
-//       throw new Error('MONGODB_URI is not defined in environment variables');
-//     }
-
-//     await mongoose.connect(uri);
-
-//     console.log('MongoDB connected successfully');
-//   } catch (error) {
-//     console.error('MongoDB connection failed:', error.message);
-//     process.exit(1);
-//   }
-// };
-
-// module.exports = connectDB;
-
-
-// const mongoose = require('mongoose');
-// const dotenv = require('dotenv');
-// const dns = require('dns');
-
-// dotenv.config();
-
-// const connectDB = async () => {
-//   try {
-//     const uri = process.env.MONGODB_URI;
-//     if (!uri) {
-//       throw new Error('MONGODB_URI is not defined in environment variables');
-//     }
-
-//     const dnsServers = (process.env.DNS_SERVERS || '8.8.8.8,1.1.1.1')
-//       .split(',')
-//       .map((server) => server.trim())
-//       .filter(Boolean);
-
-//     if (dnsServers.length) {
-//       dns.setServers(dnsServers);
-//       console.log('Using DNS servers:', dnsServers.join(', '));
-//     }
-
-//     await mongoose.connect(uri, {
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true
-//     });
-//     console.log('MongoDB connected successfully');
-//   } catch (error) {
-//     console.error('MongoDB connection failed:', error.message);
-//     process.exit(1);
-//   }
-// };
-
-// module.exports = connectDB;
