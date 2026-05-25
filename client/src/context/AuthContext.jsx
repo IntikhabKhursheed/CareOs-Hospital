@@ -6,31 +6,18 @@ import { navigateTo } from '../utils/navigation';
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [socket, setSocket] = useState(null);
-
-
-// INITIAL AUTH CHECK
-useEffect(() => {
-  const initializeAuth = async () => {
+  const [user, setUser] = useState(() => {
     try {
       const storedUser = localStorage.getItem('careos_user');
-
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
+      return storedUser ? JSON.parse(storedUser) : null;
     } catch (err) {
       localStorage.removeItem('careos_user');
-      setUser(null);
-    } finally {
-      setLoading(false);
+      return null;
     }
-  };
-
-  initializeAuth();
-}, []);
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [socket, setSocket] = useState(null);
 
   // SAVE USER
   useEffect(() => {

@@ -1,9 +1,15 @@
-import { useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { navigateTo } from '../utils/navigation';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigateTo('/login', { replace: true });
+    }
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -16,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return null;
   }
 
   return children;

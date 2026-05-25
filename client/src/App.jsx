@@ -98,7 +98,7 @@ function App() {
 
   const routeComponent = useMemo(() => {
     if (path === '/login') return <Login />;
-    if (path === '/dashboard') return user?.role === 'doctor' ? <DoctorDashboard /> : <AdminDashboard />;
+    if (path === '/' || path === '/dashboard') return user?.role === 'doctor' ? <DoctorDashboard /> : <AdminDashboard />;
     if (path === '/consultations') return <ConsultationScreen />;
     if (path.startsWith('/consultation/')) return <ConsultationScreen />;
     if (path === '/lab') return <LabQueue />;
