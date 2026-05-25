@@ -11,20 +11,26 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState('');
   const [socket, setSocket] = useState(null);
 
-  // INITIAL AUTH CHECK
-  useEffect(() => {
-    const storedUser = localStorage.getItem('careos_user');
 
-    if (storedUser) {
-      try {
+// INITIAL AUTH CHECK
+useEffect(() => {
+  const initializeAuth = async () => {
+    try {
+      const storedUser = localStorage.getItem('careos_user');
+
+      if (storedUser) {
         setUser(JSON.parse(storedUser));
-      } catch (err) {
-        localStorage.removeItem('careos_user');
       }
+    } catch (err) {
+      localStorage.removeItem('careos_user');
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
-  }, []);
+  initializeAuth();
+}, []);
 
   // SAVE USER
   useEffect(() => {
