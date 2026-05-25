@@ -6,13 +6,20 @@ import { navigateTo } from '../utils/navigation';
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('careos_user');
-    return stored ? JSON.parse(stored) : null;
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('careos_user');
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (user) {
