@@ -1,30 +1,23 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { navigateTo } from '../utils/navigation';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigateTo('/login', { replace: true });
-    }
-  }, [loading, user]);
-
-if (loading) {
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-        <p className="text-slate-700">Checking authentication...</p>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
+          <p className="text-slate-700">Checking authentication...</p>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-if (!user) {
-  navigateTo('/login', { replace: true });
-  return null;
-}
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 };
