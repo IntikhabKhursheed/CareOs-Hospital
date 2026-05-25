@@ -98,3 +98,5 @@ data/
 # Temporary files
 *.tmp
 *.temp
+.vercel
+.env*.local
