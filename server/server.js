@@ -26,57 +26,40 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-connectDB();
+// Shared CORS options — used by middleware, preflight, and Socket.io
+const corsOptions = {
+  origin: function (origin, callback) {
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+};
 
-// let server;
-// let io;
+// CORS must be the very first middleware so preflight (OPTIONS) requests
+// are handled before helmet or any other middleware can interfere
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
-// if (process.env.VERCEL !== '1') {
-//   server = http.createServer(app);
+// Helmet configured to not override cross-origin resource policy set by CORS
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(morgan('dev'));
+app.use(compression());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-//   io = new Server(server, {
-//     cors: {
-//       origin: process.env.CLIENT_URL || 'http://localhost:5173',
-//       methods: ['GET', 'POST'],
-//       credentials: true
-//     }
-//   });
-
-//   app.set('io', io);
-// }
+// Socket.io — only active outside of Vercel (serverless doesn't support persistent sockets)
 const server = http.createServer(app);
-
 let io = null;
 
 if (process.env.VERCEL !== '1') {
-  io = new Server(server, {
-    cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
-      methods: ['GET', 'POST'],
-      credentials: true
-    }
-  });
-
+  io = new Server(server, { cors: corsOptions });
   app.set('io', io);
 }
 
 connectDB();
 app.set('io', io);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-// app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
-app.use(cors({
-  origin: function(origin, callback) {
-    callback(null, true)
-  },
-  credentials: true
-}))
-app.options('*', cors())
-app.use(helmet());
-app.use(morgan('dev'));
-app.use(compression());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -86,12 +69,12 @@ const limiter = rateLimit({
   message: {
     success: false,
     message: 'Too many requests, please try again later.',
-    data: null
-  }
+    data: null,
+  },
 });
 
+// Auth routes are exempt from the rate limiter
 app.use('/api/auth', authRoutes);
-
 app.use(limiter);
 
 app.use('/api/patients', patientRoutes);
@@ -104,13 +87,10 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
 app.use('/api/billing', billingRoutes);
 
-/* ADD THIS HERE */
 app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'CareOS API Running'
-  });
+  res.json({ success: true, message: 'CareOS API Running' });
 });
+
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: 'Route not found', data: null });
 });
@@ -120,33 +100,16 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message: err.message || 'Internal server error',
-    data: err.data || null
+    data: err.data || null,
   });
 });
 
 if (process.env.VERCEL !== '1') {
   socketHandler(io);
-
   const PORT = process.env.PORT || 5001;
-
   server.listen(PORT, () => {
     console.log(`CareOS server running on port ${PORT}`);
   });
 }
 
-// socketHandler(io);
-// if (process.env.VERCEL !== '1') {
-//   socketHandler(io);
-//   const PORT = process.env.PORT || 5001;
-
-//   server.listen(PORT, () => {
-//     console.log(`CareOS server running on port ${PORT}`);
-//   });
-// }
-
 module.exports = app;
-
-// const PORT = process.env.PORT || 5001;
-// server.listen(PORT, () => {
-//   console.log(`CareOS server running on port ${PORT}`);
-// });
