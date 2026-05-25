@@ -27,9 +27,21 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Shared CORS options — used by middleware, preflight, and Socket.io
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://careos-hospital-client.vercel.app',
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    callback(null, true);
+    // allow requests with no origin (postman/mobile apps)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
