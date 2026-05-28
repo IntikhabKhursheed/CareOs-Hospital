@@ -132,14 +132,4 @@ if (process.env.VERCEL !== '1') {
   });
 }
 
-// module.exports = app;
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    success: false,
-    message: err.message || 'Internal server error',
-    data: err.data || null,
-  });
-});
-
 module.exports = app;

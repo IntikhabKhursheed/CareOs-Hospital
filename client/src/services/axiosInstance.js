@@ -4,8 +4,8 @@ import { navigateTo } from '../utils/navigation';
 const api = axios.create({
   baseURL:
   import.meta.env.VITE_API_URL ||
-  'https://careos-hospital-server.vercel.app/api',
-  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  'https://care-os-hospital.vercel.app/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json'
   },
