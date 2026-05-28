@@ -99,6 +99,13 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
 app.use('/api/billing', billingRoutes);
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API healthy',
+  });
+});
+
 app.get('/', (req, res) => {
   res.json({ success: true, message: 'CareOS API Running' });
 });
