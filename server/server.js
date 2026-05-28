@@ -30,6 +30,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   'http://localhost:5173',
   'https://careos-hospital-client.vercel.app',
+  'https://careos-hospital-client-na3puqjqo-vertax.vercel.app',
 ];
 
 const corsOptions = {
@@ -123,13 +124,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// if (process.env.VERCEL !== '1') {
-//   socketHandler(io);
-//   const PORT = process.env.PORT || 5001;
-//   server.listen(PORT, () => {
-//     console.log(`CareOS server running on port ${PORT}`);
-//   });
-// }
+if (process.env.VERCEL !== '1') {
+  socketHandler(io);
+  const PORT = process.env.PORT || 5001;
+  server.listen(PORT, () => {
+    console.log(`CareOS server running on port ${PORT}`);
+  });
+}
 
 // module.exports = app;
 app.use((err, req, res, next) => {
