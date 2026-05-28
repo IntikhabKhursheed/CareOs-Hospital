@@ -40,7 +40,7 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 15000, // Timeout after 15 seconds
       family: 4,                       // Force IPv4 DNS resolution (crucial for Vercel/AWS serverless)
       socketTimeoutMS: 45000,          // Close sockets after 45 seconds of inactivity
-      keepAlive: true                  // Keep connection alive across serverless invocations
+      // keepAlive: true                  // Keep connection alive across serverless invocations
     });
 
     isConnected = true;
