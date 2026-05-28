@@ -3,7 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import authService from '../../services/authService';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Check } from 'lucide-react';
-import bannerImage from '../../assets/careos-banner.png';
+// import bannerImage from '../../assets/careos-banner.png';
 
 const Login = () => {
   const { login, loading, error } = useContext(AuthContext);
@@ -68,13 +68,13 @@ const Login = () => {
       <div className="min-h-screen flex">
         {brandSide}
         <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
-          <div className="w-full max-w-5xl mb-6">
+          {/* <div className="w-full max-w-5xl mb-6">
   <img
     src={bannerImage}
     alt="CareOS Banner"
     className="w-full rounded-3xl shadow-2xl"
   />
-</div>
+</div> */}
           <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[var(--shadow)]">
             <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Create Account</h2>
             <p className="text-[var(--text-secondary)] mb-8">Register for CareOS access</p>
