@@ -4,53 +4,73 @@ const dns = require('dns');
 
 dotenv.config();
 
-// Global cached connection state
-let isConnected = false;
+let cachedConnection = null;
+let connectionPromise = null;
 
 const connectDB = async () => {
-  // If already connected or connecting, do not initiate another connection
-  if (isConnected || mongoose.connection.readyState >= 1) {
-    console.log('Using existing MongoDB connection');
-    return;
-  }
-
   try {
     const uri = process.env.MONGODB_URI;
 
     if (!uri) {
-      console.error('MONGODB_URI is not defined in environment variables');
-      return;
+      throw new Error('MONGODB_URI is not defined in environment variables');
     }
 
     if (!uri.startsWith('mongodb://') && !uri.startsWith('mongodb+srv://')) {
-      console.error('Invalid MongoDB URI. It must start with mongodb:// or mongodb+srv://');
-      return;
+      throw new Error('Invalid MongoDB URI. It must start with mongodb:// or mongodb+srv://');
     }
 
-    // Always attempt setting DNS servers to Google and Cloudflare to resolve SRV issues in Node.js
+    if (cachedConnection && mongoose.connection.readyState === 1) {
+      console.log('Using existing MongoDB connection');
+      return cachedConnection;
+    }
+
+    if (mongoose.connection.readyState === 1) {
+      console.log('MongoDB already connected');
+      cachedConnection = mongoose.connection;
+      return cachedConnection;
+    }
+
+    if (connectionPromise) {
+      console.log('MongoDB connection already in progress, waiting...');
+      cachedConnection = await connectionPromise;
+      return cachedConnection;
+    }
+
     try {
+      dns.setDefaultResultOrder('ipv4first');
       dns.setServers(['8.8.8.8', '1.1.1.1']);
-      console.log('DNS servers configured successfully for SRV lookups');
+      console.log('DNS configured successfully for MongoDB SRV lookups');
     } catch (dnsErr) {
-      console.warn('Failed to set custom DNS servers (handled gracefully):', dnsErr.message);
+      console.warn('Failed to configure DNS, continuing:', dnsErr.message);
     }
 
     console.log('Connecting to MongoDB Atlas...');
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 15000, // Timeout after 15 seconds
-      family: 4,                       // Force IPv4 DNS resolution (crucial for Vercel/AWS serverless)
-      socketTimeoutMS: 45000,          // Close sockets after 45 seconds of inactivity
-      // keepAlive: true                  // Keep connection alive across serverless invocations
+
+    connectionPromise = mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
+      family: 4,
+      maxPoolSize: 10,
+      bufferCommands: false,
     });
 
-    isConnected = true;
+    cachedConnection = await connectionPromise;
+
     console.log('MongoDB connected successfully');
+
+    return cachedConnection;
   } catch (error) {
+    connectionPromise = null;
+    cachedConnection = null;
+
     console.error('MongoDB connection failed:', error.message);
-    // Never crash the Vercel serverless container on startup
+
     if (process.env.VERCEL !== '1') {
       process.exit(1);
     }
+
+    throw error;
   }
 };
 

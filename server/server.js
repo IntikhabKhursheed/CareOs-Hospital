@@ -7,6 +7,7 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 
 const connectDB = require('./config/db');
@@ -85,12 +86,16 @@ if (process.env.VERCEL !== '1') {
   app.set('io', null);
 }
 
-connectDB();
+// Start initial MongoDB connection, but do not block Vercel startup
+connectDB().catch((error) => {
+  console.error('Initial MongoDB connection error:', error.message);
+});
 
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'API healthy',
+    dbState: mongoose.connection.readyState,
   });
 });
 
@@ -98,6 +103,7 @@ app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'CareOS API Running',
+    dbState: mongoose.connection.readyState,
   });
 });
 
@@ -111,6 +117,25 @@ const limiter = rateLimit({
     message: 'Too many requests, please try again later.',
     data: null,
   },
+});
+
+// Ensure MongoDB is connected before any API route runs
+app.use('/api', async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
+
+    next();
+  } catch (error) {
+    console.error('Database middleware error:', error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      data: error.message,
+    });
+  }
 });
 
 app.use('/api/auth', authRoutes);
