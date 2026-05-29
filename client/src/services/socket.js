@@ -3,7 +3,9 @@ import { io } from 'socket.io-client';
 let socketInstance = null;
 
 const shouldEnableSocket = () => {
-  return !import.meta.env.PROD;
+  // Socket.io only works locally.
+  // Disable it on Vercel production because Vercel serverless does not support persistent Socket.io.
+  return import.meta.env.DEV;
 };
 
 const getSocketUrl = () => {
@@ -11,7 +13,6 @@ const getSocketUrl = () => {
 };
 
 export const connectSocket = () => {
-  // Disable Socket.io on Vercel production
   if (!shouldEnableSocket()) {
     return null;
   }
@@ -21,7 +22,7 @@ export const connectSocket = () => {
       withCredentials: true,
       autoConnect: false,
       reconnection: true,
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     });
   }
 
@@ -32,7 +33,13 @@ export const connectSocket = () => {
   return socketInstance;
 };
 
-export const getSocket = () => socketInstance;
+export const getSocket = () => {
+  if (!shouldEnableSocket()) {
+    return null;
+  }
+
+  return socketInstance;
+};
 
 export const disconnectSocket = () => {
   if (!socketInstance) return;

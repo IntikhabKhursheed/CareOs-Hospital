@@ -28,32 +28,38 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  // SOCKET CONNECTION
-  useEffect(() => {
-    if (!user) {
-      disconnectSocket();
-      setSocket(null);
-      return;
-    }
+// SOCKET CONNECTION
+useEffect(() => {
+  if (!user) {
+    disconnectSocket();
+    setSocket(null);
+    return;
+  }
 
-    const sharedSocket = connectSocket();
+  const sharedSocket = connectSocket();
 
-    const onConnect = () => {
-      sharedSocket.emit('join_room', 'global');
-    };
+  // In production, connectSocket() returns null because Socket.io is disabled.
+  if (!sharedSocket) {
+    setSocket(null);
+    return;
+  }
 
-    sharedSocket.off('connect', onConnect).on('connect', onConnect);
+  const onConnect = () => {
+    sharedSocket.emit('join_room', 'global');
+  };
 
-    if (sharedSocket.connected) {
-      onConnect();
-    }
+  sharedSocket.off('connect', onConnect).on('connect', onConnect);
 
-    setSocket(sharedSocket);
+  if (sharedSocket.connected) {
+    onConnect();
+  }
 
-    return () => {
-      sharedSocket.off('connect', onConnect);
-    };
-  }, [user]);
+  setSocket(sharedSocket);
+
+  return () => {
+    sharedSocket.off('connect', onConnect);
+  };
+}, [user]);
 
   const login = async ({ email, password }) => {
     setLoading(true);
