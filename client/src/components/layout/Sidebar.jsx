@@ -1,4 +1,6 @@
-import { Moon, Sun, X } from 'lucide-react';
+import { useContext } from 'react';
+import { Moon, Sun, X, Lock, Shield } from 'lucide-react';
+import { RBACContext, DEMO_ROLES, ROLE_LABELS } from '../../context/RBACContext';
 
 const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOpen, onClose }) => {
   return (
@@ -46,7 +48,21 @@ const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOp
   );
 };
 
+const RoleBadgeColor = {
+  admin:   { bg: 'bg-indigo-100', text: 'text-indigo-700', dot: 'bg-indigo-500' },
+  doctor:  { bg: 'bg-teal-100',   text: 'text-teal-700',   dot: 'bg-teal-500'   },
+  labtech: { bg: 'bg-sky-100',    text: 'text-sky-700',    dot: 'bg-sky-500'    },
+  patient: { bg: 'bg-amber-100',  text: 'text-amber-700',  dot: 'bg-amber-500'  },
+};
+
 const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logout }) => {
+  const rbac = useContext(RBACContext);
+  const activeRole = rbac?.activeRole || user?.role || 'admin';
+  const setActiveRole = rbac?.setActiveRole;
+  const canAccess = rbac?.canAccess;
+
+  const badgeStyle = RoleBadgeColor[activeRole] || RoleBadgeColor.admin;
+
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
@@ -67,23 +83,42 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
         <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = currentPath === item.path;
+            const isLocked = canAccess ? !canAccess(item.path) : false;
+
             return (
               <li key={item.path}>
                 <a
                   href={item.path}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                    isActive
+                  onClick={isLocked ? (e) => e.preventDefault() : undefined}
+                  title={isLocked ? `Access restricted for ${ROLE_LABELS[activeRole] || activeRole}` : item.label}
+                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                    isLocked
+                      ? 'cursor-not-allowed opacity-40'
+                      : isActive
                       ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)]'
                       : 'text-[var(--text-secondary)] hover:bg-[var(--sidebar-active)]/50 hover:text-[var(--text-primary)]'
                   }`}
                 >
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
-                    isActive ? 'bg-[var(--accent)] text-white shadow-sm' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
+                    isLocked
+                      ? 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                      : isActive
+                      ? 'bg-[var(--accent)] text-white shadow-sm'
+                      : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
                   }`}>
                     {item.icon}
                   </span>
                   <span className="truncate">{item.label}</span>
-                  {isActive && (
+
+                  {/* Lock icon for restricted links */}
+                  {isLocked && (
+                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[var(--bg-secondary)]">
+                      <Lock size={11} className="text-[var(--text-secondary)]" />
+                    </span>
+                  )}
+
+                  {/* Active indicator */}
+                  {isActive && !isLocked && (
                     <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
                   )}
                 </a>
@@ -94,20 +129,48 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t border-[var(--border)] px-3 py-4">
-        {/* User profile */}
-        <div className="flex items-center gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 shadow-sm">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-sm font-semibold text-white">
-            {user?.name?.slice(0, 2).toUpperCase() || 'US'}
+      <div className="border-t border-[var(--border)] px-3 py-4 space-y-3">
+
+        {/* User profile + Role Badge */}
+        <div className="rounded-xl bg-[var(--bg-secondary)] px-3 py-3 shadow-sm border border-[var(--border)]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-sm font-semibold text-white">
+              {user?.name?.slice(0, 2).toUpperCase() || 'US'}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{user?.name || 'User Name'}</p>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">{user?.email || ''}</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{user?.name || 'User Name'}</p>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">{user?.role || 'Staff'}</p>
+          {/* Role Badge */}
+          <div className="mt-2.5 flex items-center gap-2">
+            <Shield size={12} className={badgeStyle.text} />
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${badgeStyle.bg} ${badgeStyle.text}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${badgeStyle.dot}`} />
+              Role: {ROLE_LABELS[activeRole] || activeRole}
+            </span>
           </div>
         </div>
 
+        {/* Demo Role Switcher */}
+        <div className="rounded-xl bg-[var(--bg-secondary)] px-3 py-3 shadow-sm border border-[var(--border)] border-dashed">
+          <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--text-secondary)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+            Demo: Switch Role
+          </p>
+          <select
+            value={activeRole}
+            onChange={(e) => setActiveRole && setActiveRole(e.target.value)}
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-2 text-xs font-medium text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)] cursor-pointer"
+          >
+            {DEMO_ROLES.map((r) => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Theme toggle */}
-        <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 shadow-sm">
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 shadow-sm border border-[var(--border)]">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--bg-primary)] text-[var(--accent)]">
               {theme === 'light' ? <Sun size={16} /> : <Moon size={16} />}
@@ -130,7 +193,7 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
         <button
           type="button"
           onClick={logout}
-          className="mt-3 w-full rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+          className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
         >
           Sign out
         </button>

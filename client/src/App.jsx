@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { LayoutDashboard, Users, Calendar, UserPlus, Clock, FlaskConical, TestTube2, Receipt, Shield, Stethoscope, Menu, X } from 'lucide-react';
+import { useRBAC } from './context/RBACContext';
 import Login from './pages/auth/Login';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthContext } from './context/AuthContext';
@@ -25,43 +26,27 @@ import NotFound from './pages/NotFound';
 import Sidebar from './components/layout/Sidebar';
 import { navigateTo, subscribeNavigation } from './utils/navigation';
 
-const getNavItems = (role) => {
-  const adminItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
-    { label: 'Patients', path: '/patients', icon: <Users size={18} /> },
-    { label: 'Doctors', path: '/doctors', icon: <Stethoscope size={18} /> },
-    { label: 'Appointments', path: '/appointments', icon: <Calendar size={18} /> },
-    { label: 'New Patient', path: '/patients/new', icon: <UserPlus size={18} /> },
-    { label: 'Queue', path: '/appointments/queue', icon: <Clock size={18} /> },
-    { label: 'Lab Queue', path: '/lab', icon: <FlaskConical size={18} /> },
-    { label: 'Test Catalog', path: '/tests', icon: <TestTube2 size={18} /> },
-    { label: 'Billing', path: '/billing', icon: <Receipt size={18} /> },
-    { label: 'Patient Portal', path: '/portal', icon: <Shield size={18} /> }
-  ];
-
-  if (role === 'doctor') {
-    return [
-      { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
-      { label: 'Consultations', path: '/consultations', icon: <Stethoscope size={18} /> },
-      { label: 'Lab Queue', path: '/lab', icon: <FlaskConical size={18} /> },
-      { label: 'Billing', path: '/billing', icon: <Receipt size={18} /> },
-      { label: 'Patient Portal', path: '/portal', icon: <Shield size={18} /> }
-    ];
-  }
-
-  if (role === 'patient') {
-    return [
-      { label: 'My Portal', path: '/portal', icon: <Shield size={18} /> },
-      { label: 'Lab Results', path: '/lab', icon: <FlaskConical size={18} /> },
-      { label: 'Billing', path: '/billing', icon: <Receipt size={18} /> }
-    ];
-  }
-
-  return adminItems;
-};
+/**
+ * Always returns ALL nav items so the Sidebar can show locked icons.
+ * The canAccess() function in RBACContext determines which are locked.
+ */
+const getAllNavItems = () => [
+  { label: 'Dashboard',       path: '/dashboard',          icon: <LayoutDashboard size={18} /> },
+  { label: 'Consultations',   path: '/consultations',      icon: <Stethoscope size={18} /> },
+  { label: 'Patients',        path: '/patients',           icon: <Users size={18} /> },
+  { label: 'Doctors',         path: '/doctors',            icon: <Stethoscope size={18} /> },
+  { label: 'Appointments',    path: '/appointments',       icon: <Calendar size={18} /> },
+  { label: 'New Patient',     path: '/patients/new',       icon: <UserPlus size={18} /> },
+  { label: 'Queue',           path: '/appointments/queue', icon: <Clock size={18} /> },
+  { label: 'Lab Queue',       path: '/lab',                icon: <FlaskConical size={18} /> },
+  { label: 'Test Catalog',    path: '/tests',              icon: <TestTube2 size={18} /> },
+  { label: 'Billing',         path: '/billing',            icon: <Receipt size={18} /> },
+  { label: 'Patient Portal',  path: '/portal',             icon: <Shield size={18} /> },
+];
 
 function App() {
   const { user, logout } = useContext(AuthContext);
+  const rbac = useRBAC();
   const [path, setPath] = useState(window.location.pathname);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('careos_theme') === 'dark' ? 'dark' : 'light';
@@ -123,7 +108,7 @@ function App() {
     return <Login />;
   }
 
-  const navItems = getNavItems(user?.role);
+  const navItems = getAllNavItems();
 
   return (
     <ProtectedRoute>
