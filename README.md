@@ -1,31 +1,62 @@
-# CareOS 🏥
+# CareOS — AI Clinical Decision Support System
 
-An enterprise-grade, AI-powered Hospital & Clinic Management System 
-built for modern healthcare facilities. CareOS digitizes and 
-intelligently automates the complete hospital workflow — from patient 
-registration to discharge — using cutting-edge AI.
+Author: Intikhab Khursheed | intikhabkhurheed.netlify.app
+Live Demo: https://careos.vercel.app (public demo, no login required)
+Status: Self-built portfolio project — demo environment only, no real patient data
 
-## 🚀 Features
+## Overview
 
-- 🤖 AI Clinical Note Generation — doctors dictate, AI writes
-- 🔬 Intelligent Lab Result Interpretation with critical value alerts
-- 💊 Drug Interaction Checker before every prescription
-- 📊 Real-time Hospital Dashboard with live KPIs
-- 🛏️ IPD Ward & Bed Management with live occupancy map
-- 🧾 Automated Billing with AI anomaly detection
-- 📱 Patient Self-Service Portal
-- 🔔 Real-time alerts via Socket.io
-- 👥 Role-based access — Admin, Doctor, Nurse, Receptionist, Lab, Pharmacy, Patient
+CareOS is a self-developed AI-powered hospital and clinic management platform 
+built to demonstrate production-grade architecture for clinical decision support. 
+It digitizes core hospital workflows and integrates an LLM backend for 
+AI-assisted clinical tasks.
 
-## 🛠️ Tech Stack
+The system enforces strict role isolation across 8 user roles using multi-layer 
+RBAC and stateful JWT validation, ensuring that AI-generated outputs and 
+real-time event streams remain scoped to the correct clinical context.
 
-**Frontend:** React.js 18, Tailwind CSS, Recharts, Socket.io-client  
-**Backend:** Node.js, Express.js, MongoDB, Redis, Socket.io  
-**AI:** Grok API (llama-3.3-70b-versatile)  
-**Auth:** JWT with refresh token rotation  
-**Other:** Cloudinary, Twilio, WebRTC, Docker, GitHub Actions  
+## Key Technical Features
 
-## 👨‍💻 Author
+- 8-role RBAC architecture (Admin, Doctor, Nurse, Receptionist, Lab, Pharmacy, 
+  Patient, Billing) with stateful JWT validation and token-verified Socket.io 
+  event streams preventing cross-role data leakage
+- Grok AI (llama-3.3-70b-versatile) integration for clinical note generation, 
+  lab result interpretation, and drug interaction checking
+- Real-time alerts via Socket.io across role-isolated channels
+- Dockerized deployment with environment-isolated service containers
+- AI anomaly detection on billing records
 
-Built by Intikhab Khursheed — Frontend & Full Stack Developer  
-🔗 [Portfolio](https://intikhabdev.netlify.app) | [LinkedIn](https://www.linkedin.com/in/intikhab-khursheed-afridi-028a51285/)
+## Architecture
+
+Client (React 18) communicates with an Express.js REST API backed by MongoDB 
+Atlas. All AI calls route through a server-side proxy to prevent key exposure. 
+Socket.io manages real-time event broadcasting with middleware-level role 
+enforcement before any event reaches the client.
+
+## Tech Stack
+
+Frontend: React 18, Tailwind CSS, Recharts, Socket.io-client
+Backend: Node.js, Express.js, MongoDB Atlas, Mongoose, Socket.io
+AI: Grok API (llama-3.3-70b-versatile)
+Auth: JWT with refresh token rotation, 8-role RBAC
+DevOps: Docker, GitHub Actions, Vercel
+
+## Security Architecture
+
+- Cross-role isolation: Socket.io rooms are scoped per role at connection time
+- JWT middleware validates role claims on every protected route
+- AI prompt construction isolates patient context per authenticated session
+- Input validation and API sanitization on all LLM-facing endpoints
+
+## Setup
+
+```bash
+git clone https://github.com/IntikhabKhursheed/CareOs-Hospital.git
+cd CareOs-Hospital
+cp .env.example .env
+# Add MONGODB_URI, GROK_API_KEY, JWT_SECRET
+npm install
+npm run dev
+```
+
+Demo credentials available at the live demo link above.
