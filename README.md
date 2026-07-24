@@ -1,7 +1,7 @@
 # CareOS — AI Clinical Decision Support System
 
 Author: Intikhab Khursheed | intikhabkhurheed.netlify.app
-Live Demo: https://careos.vercel.app (public demo, no login required)
+Live Demo:[careos-hospital-client.vercel.app](https://careos-hospital-client.vercel.app/login) (public demo, no login required)
 Status: Self-built portfolio project — demo environment only, no real patient data
 
 ## Overview
