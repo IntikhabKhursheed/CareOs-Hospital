@@ -2,9 +2,117 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import authService from '../../services/authService';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, Check } from 'lucide-react';
-// import bannerImage from '../../assets/careos-banner.png';
+import { Eye, EyeOff } from 'lucide-react';
 
+/* ─────────────────────────────────────────────
+   Inline SVG: friendly 3-D style doctor figure
+───────────────────────────────────────────── */
+const DoctorIllustration = () => (
+  <svg viewBox="0 0 340 420" fill="none" xmlns="http://www.w3.org/2000/svg" className="login-doctor-svg">
+    {/* ── shadow ── */}
+    <ellipse cx="170" cy="408" rx="80" ry="12" fill="rgba(0,0,0,0.10)" />
+
+    {/* ── lab coat body ── */}
+    <rect x="95" y="210" width="150" height="170" rx="28" fill="#FFFFFF" />
+    {/* coat lapels */}
+    <polygon points="170,210 130,230 140,290 170,270" fill="#E8F5F5" />
+    <polygon points="170,210 210,230 200,290 170,270" fill="#E8F5F5" />
+    {/* coat buttons */}
+    <circle cx="170" cy="295" r="4" fill="#CFE8E8" />
+    <circle cx="170" cy="315" r="4" fill="#CFE8E8" />
+    <circle cx="170" cy="335" r="4" fill="#CFE8E8" />
+
+    {/* ── scrubs / shirt under coat ── */}
+    <rect x="128" y="215" width="84" height="80" rx="8" fill="#4DB6AC" />
+
+    {/* ── stethoscope ── */}
+    <path d="M148 248 Q135 270 145 285 Q158 300 170 285 Q182 300 195 285 Q205 270 192 248" stroke="#37474F" strokeWidth="4" fill="none" strokeLinecap="round" />
+    <circle cx="170" cy="288" r="9" fill="#37474F" stroke="#546E7A" strokeWidth="2" />
+    <circle cx="148" cy="248" r="5" fill="#78909C" />
+    <circle cx="192" cy="248" r="5" fill="#78909C" />
+
+    {/* ── left arm / sleeve ── */}
+    <rect x="60" y="218" width="42" height="110" rx="20" fill="#FFFFFF" />
+    {/* left hand */}
+    <ellipse cx="81" cy="338" rx="18" ry="14" fill="#FFCCBC" />
+    {/* thumb-up shape */}
+    <ellipse cx="72" cy="326" rx="8" ry="13" fill="#FFCCBC" transform="rotate(-20 72 326)" />
+    <ellipse cx="88" cy="330" rx="6" ry="10" fill="#FFCCBC" transform="rotate(10 88 330)" />
+
+    {/* ── right arm / sleeve ── */}
+    <rect x="238" y="218" width="42" height="110" rx="20" fill="#FFFFFF" />
+    {/* right hand relaxed */}
+    <ellipse cx="259" cy="337" rx="18" ry="14" fill="#FFCCBC" />
+
+    {/* ── neck ── */}
+    <rect x="154" y="175" width="32" height="42" rx="14" fill="#FFCCBC" />
+
+    {/* ── head ── */}
+    <ellipse cx="170" cy="148" rx="58" ry="62" fill="#FFCCBC" />
+
+    {/* ── hair ── */}
+    <path d="M112 130 Q115 78 170 72 Q225 78 228 130 Q220 100 200 92 Q185 88 170 90 Q155 88 140 92 Q120 100 112 130Z" fill="#6D4C41" />
+
+    {/* ── ears ── */}
+    <ellipse cx="113" cy="152" rx="10" ry="13" fill="#FFCCBC" />
+    <ellipse cx="227" cy="152" rx="10" ry="13" fill="#FFCCBC" />
+    <ellipse cx="113" cy="152" rx="6" ry="9" fill="#FFAB91" />
+    <ellipse cx="227" cy="152" rx="6" ry="9" fill="#FFAB91" />
+
+    {/* ── eyebrows ── */}
+    <path d="M145 126 Q155 120 165 124" stroke="#5D4037" strokeWidth="3" strokeLinecap="round" fill="none" />
+    <path d="M175 124 Q185 120 195 126" stroke="#5D4037" strokeWidth="3" strokeLinecap="round" fill="none" />
+
+    {/* ── eyes ── */}
+    <ellipse cx="155" cy="142" rx="10" ry="11" fill="white" />
+    <ellipse cx="185" cy="142" rx="10" ry="11" fill="white" />
+    <circle cx="157" cy="144" r="6" fill="#37474F" />
+    <circle cx="187" cy="144" r="6" fill="#37474F" />
+    <circle cx="159" cy="142" r="2.5" fill="white" />
+    <circle cx="189" cy="142" r="2.5" fill="white" />
+
+    {/* ── smile ── */}
+    <path d="M152 168 Q170 182 188 168" stroke="#E57373" strokeWidth="3" fill="none" strokeLinecap="round" />
+    <path d="M152 168 Q170 178 188 168" fill="#FFCDD2" />
+
+    {/* ── cheek blush ── */}
+    <ellipse cx="140" cy="162" rx="12" ry="7" fill="#FFAB91" opacity="0.5" />
+    <ellipse cx="200" cy="162" rx="12" ry="7" fill="#FFAB91" opacity="0.5" />
+
+    {/* ── name badge ── */}
+    <rect x="152" y="240" width="36" height="22" rx="4" fill="#E0F2F1" stroke="#80CBC4" strokeWidth="1.5" />
+    <rect x="157" y="245" width="26" height="3" rx="1.5" fill="#80CBC4" />
+    <rect x="157" y="251" width="18" height="3" rx="1.5" fill="#B2DFDB" />
+    <rect x="157" y="257" width="22" height="3" rx="1.5" fill="#B2DFDB" />
+
+    {/* ── decorative floating circles ── */}
+    <circle cx="42" cy="60" r="18" fill="rgba(255,255,255,0.18)" />
+    <circle cx="295" cy="30" r="12" fill="rgba(255,255,255,0.14)" />
+    <circle cx="30" cy="340" r="10" fill="rgba(255,255,255,0.12)" />
+    <circle cx="310" cy="310" r="22" fill="rgba(255,255,255,0.10)" />
+  </svg>
+);
+
+/* ─────────────────────────────────────────────
+   Hospital Logo SVG
+───────────────────────────────────────────── */
+const HospitalLogo = () => (
+  <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="42" height="42" rx="10" fill="url(#logoGrad)" />
+    <rect x="18" y="9" width="6" height="24" rx="3" fill="white" />
+    <rect x="9" y="18" width="24" height="6" rx="3" fill="white" />
+    <defs>
+      <linearGradient id="logoGrad" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#26C6DA" />
+        <stop offset="1" stopColor="#00ACC1" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+/* ─────────────────────────────────────────────
+   Main Login Component
+───────────────────────────────────────────── */
 const Login = () => {
   const { login, loading, error } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -16,16 +124,14 @@ const Login = () => {
     email: '',
     password: '',
     role: 'patient',
-    phone: ''
+    phone: '',
   });
 
-  const handleLoginChange = (e) => {
+  const handleLoginChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
-  const handleRegisterChange = (e) => {
+  const handleRegisterChange = (e) =>
     setRegisterData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -51,66 +157,93 @@ const Login = () => {
     }
   };
 
-  const brandSide = (
-    <div className="hidden lg:flex lg:w-[42%] flex-col justify-center p-12 text-white" style={{ background: 'linear-gradient(140deg, #4338ca 0%, #4f46e5 52%, #2563eb 100%)' }}>
-      <h1 className="text-5xl font-bold mb-4">CareOS</h1>
-      <p className="text-xl opacity-90 mb-10">AI-Powered Hospital Management</p>
-      <ul className="space-y-5 text-base opacity-90">
-        <li className="flex items-center gap-3"><Check size={22} strokeWidth={3} /> Intelligent clinical note generation</li>
-        <li className="flex items-center gap-3"><Check size={22} strokeWidth={3} /> Real-time hospital operations</li>
-        <li className="flex items-center gap-3"><Check size={22} strokeWidth={3} /> Complete patient lifecycle management</li>
-      </ul>
+  /* ── Left gradient panel (shared) ── */
+  const LeftPanel = () => (
+    <div className="login-left-panel">
+      {/* floating decorative rings */}
+      <div className="login-deco-ring ring-tl" />
+      <div className="login-deco-ring ring-br" />
+
+      <div className="login-left-content">
+        <div className="login-tagline-block">
+          <h1 className="login-hello">
+            Hello <span className="login-hello-accent">!</span>
+          </h1>
+          <p className="login-tagline">Please enter your details<br />to continue</p>
+        </div>
+        <div className="login-doctor-wrap">
+          <DoctorIllustration />
+        </div>
+      </div>
     </div>
   );
 
+  /* ── Register view ── */
   if (showRegister) {
     return (
-      <div className="min-h-screen flex">
-        {brandSide}
-        <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
-          {/* <div className="w-full max-w-5xl mb-6">
-  <img
-    src={bannerImage}
-    alt="CareOS Banner"
-    className="w-full rounded-3xl shadow-2xl"
-  />
-</div> */}
-          <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[var(--shadow)]">
-            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Create Account</h2>
-            <p className="text-[var(--text-secondary)] mb-8">Register for CareOS access</p>
-            <form className="space-y-4" onSubmit={handleRegisterSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Full Name</label>
-                <input name="name" type="text" value={registerData.name} onChange={handleRegisterChange} required className="input-field w-full" placeholder="John Doe" />
+      <div className="login-root">
+        <div className="login-card">
+          <LeftPanel />
+          <div className="login-right-panel">
+            <div className="login-form-inner">
+              {/* Logo */}
+              <div className="login-logo-row">
+                <HospitalLogo />
+                <span className="login-logo-text">
+                  <span className="login-logo-care">Care</span>OS Hospital
+                </span>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
-                <input name="email" type="email" value={registerData.email} onChange={handleRegisterChange} required className="input-field w-full" placeholder="you@example.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Password</label>
-                <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange} required className="input-field w-full" placeholder="Enter password" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Phone</label>
-                <input name="phone" type="tel" value={registerData.phone} onChange={handleRegisterChange} required className="input-field w-full" placeholder="+1234567890" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Role</label>
-                <select name="role" value={registerData.role} onChange={handleRegisterChange} className="input-field w-full">
-                  <option value="patient">Patient</option>
-                  <option value="doctor">Doctor</option>
-                  <option value="nurse">Nurse</option>
-                  <option value="receptionist">Receptionist</option>
-                  <option value="lab_technician">Lab Technician</option>
-                </select>
-              </div>
-              <button type="submit" disabled={registerLoading} className="btn-primary w-full disabled:opacity-50">
-                {registerLoading ? 'Creating Account...' : 'Create Account'}
-              </button>
-            </form>
-            <div className="mt-6 text-center">
-              <button onClick={() => setShowRegister(false)} className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition">Back to Login</button>
+
+              <h2 className="login-form-title">Create Account</h2>
+              <p className="login-form-sub">Register for CareOS access</p>
+
+              <form className="login-form" onSubmit={handleRegisterSubmit}>
+                <div className="lf-group">
+                  <label className="lf-label">Full Name</label>
+                  <input name="name" type="text" value={registerData.name} onChange={handleRegisterChange}
+                    required className="lf-input" placeholder="John Doe" />
+                </div>
+                <div className="lf-group">
+                  <label className="lf-label">Email</label>
+                  <input name="email" type="email" value={registerData.email} onChange={handleRegisterChange}
+                    required className="lf-input" placeholder="you@careos.com" />
+                </div>
+                <div className="lf-group">
+                  <label className="lf-label">Password</label>
+                  <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange}
+                    required className="lf-input" placeholder="Create a password" />
+                </div>
+                <div className="lf-group">
+                  <label className="lf-label">Phone</label>
+                  <input name="phone" type="tel" value={registerData.phone} onChange={handleRegisterChange}
+                    required className="lf-input" placeholder="+1 234 567 890" />
+                </div>
+                <div className="lf-group">
+                  <label className="lf-label">Role</label>
+                  <select name="role" value={registerData.role} onChange={handleRegisterChange} className="lf-input lf-select">
+                    <option value="patient">Patient</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="receptionist">Receptionist</option>
+                    <option value="lab_technician">Lab Technician</option>
+                  </select>
+                </div>
+
+                <button type="submit" disabled={registerLoading} className="lf-btn-primary">
+                  {registerLoading ? 'Creating Account…' : 'Create Account'}
+                </button>
+              </form>
+
+              <p className="login-switch-text">
+                Already have an account?{' '}
+                <button onClick={() => setShowRegister(false)} className="login-link">
+                  Sign In
+                </button>
+              </p>
+
+              <p className="login-footer-copy">
+                Powered by IntikhabKhursheed · Codnocrats Innovating Solutions
+              </p>
             </div>
           </div>
         </div>
@@ -118,57 +251,89 @@ const Login = () => {
     );
   }
 
+  /* ── Login view ── */
   return (
-    <div className="min-h-screen flex">
-      {brandSide}
-      <div className="flex-1 flex items-center justify-center bg-[var(--bg-primary)] p-6">
-        <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-[var(--shadow)]">
-          <h2 className="text-[28px] font-bold text-[var(--text-primary)] mb-2">Welcome back</h2>
-          <p className="text-[var(--text-secondary)] mb-8">Sign in to your account</p>
+    <div className="login-root">
+      <div className="login-card">
+        <LeftPanel />
 
-          <form className="space-y-5" onSubmit={handleLoginSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
-              <input name="email" type="email" value={formData.email} onChange={handleLoginChange} required className="input-field w-full" placeholder="admin@careos.com" />
+        <div className="login-right-panel">
+          <div className="login-form-inner">
+            {/* Hospital logo */}
+            <div className="login-logo-row">
+              <HospitalLogo />
+              <span className="login-logo-text">
+                <span className="login-logo-care">Care</span>OS Hospital
+              </span>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Password</label>
-              <div className="relative">
-                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleLoginChange} required className="input-field w-full pr-10" placeholder="Enter your password" />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+            <h2 className="login-form-title">Welcome Back</h2>
+            <p className="login-form-sub">Sign in to your account to continue</p>
+
+            <form className="login-form" onSubmit={handleLoginSubmit}>
+              {/* Email */}
+              <div className="lf-group">
+                <label htmlFor="login-email" className="lf-label">Username or E-mail</label>
+                <input
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleLoginChange}
+                  required
+                  className="lf-input"
+                  placeholder="admin@careos.com"
+                />
               </div>
-            </div>
 
-            {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-300 p-3 text-sm text-red-600">
-                {error}
+              {/* Password */}
+              <div className="lf-group">
+                <label htmlFor="login-password" className="lf-label">Password</label>
+                <div className="lf-input-wrap">
+                  <input
+                    id="login-password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleLoginChange}
+                    required
+                    className={`lf-input lf-input-icon-right${error ? ' lf-input-error' : ''}`}
+                    placeholder="••••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="lf-eye-btn"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
+                {error && <p className="lf-error-msg">{error}</p>}
               </div>
-            )}
 
-            <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
+              {/* Submit */}
+              <button type="submit" disabled={loading} className="lf-btn-primary">
+                {loading ? 'Signing in…' : 'Log In'}
+              </button>
+            </form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[var(--border)]"></div>
+            {/* Auxiliary links */}
+            <div className="login-aux-links">
+              <button className="login-link">Forgot Password?</button>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-[var(--bg-primary)] px-3 text-[var(--text-secondary)]">or</span>
-            </div>
+
+            <p className="login-switch-text">
+              Do Not Have Account?{' '}
+              <button onClick={() => setShowRegister(true)} className="login-link">
+                Sign Up
+              </button>
+            </p>
+
+            <p className="login-footer-copy">
+              Powered by IntikhabKhursheed · Codnocrats Innovating Solutions
+            </p>
           </div>
-
-          <button onClick={() => setShowRegister(true)} className="btn-secondary w-full">
-            Create Account
-          </button>
-
-          <p className="mt-8 text-center text-xs text-[var(--text-secondary)]">
-            Powered By IntikhabKhursheed Codnocrats Innovating Solutions
-          </p>
         </div>
       </div>
     </div>
