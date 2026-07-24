@@ -8,40 +8,39 @@ const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOp
       {/* Desktop sidebar — always visible on lg+ */}
       <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 flex-col p-4 lg:flex">
         <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--sidebar-bg)] shadow-[var(--shadow)]">
-        <SidebarContent
-          navItems={navItems}
-          user={user}
-          currentPath={currentPath}
-          theme={theme}
-          toggleTheme={toggleTheme}
-          logout={logout}
-        />
+          <SidebarContent
+            navItems={navItems}
+            user={user}
+            currentPath={currentPath}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            logout={logout}
+          />
         </div>
       </aside>
 
       {/* Mobile sidebar — off-canvas slide */}
       <aside
-        className={`fixed left-0 top-0 z-30 flex h-screen w-72 flex-col p-3 transition-transform duration-300 lg:hidden ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed left-0 top-0 z-30 flex h-screen w-72 flex-col p-3 transition-transform duration-300 lg:hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--sidebar-bg)] shadow-[var(--shadow)]">
-        <div className="flex items-center justify-end px-4 pt-4">
-          <button
-            onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] transition hover:bg-[var(--sidebar-active)] hover:text-[var(--text-primary)]"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <SidebarContent
-          navItems={navItems}
-          user={user}
-          currentPath={currentPath}
-          theme={theme}
-          toggleTheme={toggleTheme}
-          logout={logout}
-        />
+          <div className="flex items-center justify-end px-4 pt-4">
+            <button
+              onClick={onClose}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] transition hover:bg-[var(--sidebar-active)] hover:text-[var(--text-primary)]"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <SidebarContent
+            navItems={navItems}
+            user={user}
+            currentPath={currentPath}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            logout={logout}
+          />
         </div>
       </aside>
     </>
@@ -49,10 +48,10 @@ const Sidebar = ({ navItems, user, currentPath, theme, toggleTheme, logout, isOp
 };
 
 const RoleBadgeColor = {
-  admin:   { bg: 'bg-indigo-100', text: 'text-indigo-700', dot: 'bg-indigo-500' },
-  doctor:  { bg: 'bg-teal-100',   text: 'text-teal-700',   dot: 'bg-teal-500'   },
-  labtech: { bg: 'bg-sky-100',    text: 'text-sky-700',    dot: 'bg-sky-500'    },
-  patient: { bg: 'bg-amber-100',  text: 'text-amber-700',  dot: 'bg-amber-500'  },
+  admin: { bg: 'bg-teal-100', text: 'text-teal-700', dot: 'bg-teal-500' },
+  doctor: { bg: 'bg-cyan-100', text: 'text-cyan-700', dot: 'bg-cyan-500' },
+  labtech: { bg: 'bg-sky-100', text: 'text-sky-700', dot: 'bg-sky-500' },
+  patient: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
 };
 
 const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logout }) => {
@@ -91,21 +90,19 @@ const SidebarContent = ({ navItems, user, currentPath, theme, toggleTheme, logou
                   href={item.path}
                   onClick={isLocked ? (e) => e.preventDefault() : undefined}
                   title={isLocked ? `Access restricted for ${ROLE_LABELS[activeRole] || activeRole}` : item.label}
-                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                    isLocked
-                      ? 'cursor-not-allowed opacity-40'
-                      : isActive
+                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${isLocked
+                    ? 'cursor-not-allowed opacity-40'
+                    : isActive
                       ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)]'
                       : 'text-[var(--text-secondary)] hover:bg-[var(--sidebar-active)]/50 hover:text-[var(--text-primary)]'
-                  }`}
+                    }`}
                 >
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
-                    isLocked
-                      ? 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
-                      : isActive
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${isLocked
+                    ? 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                    : isActive
                       ? 'bg-[var(--accent)] text-white shadow-sm'
                       : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
-                  }`}>
+                    }`}>
                     {item.icon}
                   </span>
                   <span className="truncate">{item.label}</span>
